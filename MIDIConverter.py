@@ -36,16 +36,16 @@ def convert_midi_to_audio(audio, sf, sample_rate):
 
     try:
         if sf == 'megadrive':
-            fs = FluidSynth('megadrive.sf2', sample_rate=sample_rate)
+            fs = FluidSynth('soundfonts/megadrive.sf2', sample_rate=sample_rate)
             convert_midi_to_audio.sound_font = 'Megadrive / Sega Genesis'
         elif sf == 'snes':
-            fs = FluidSynth('SNES.sf2', sample_rate=sample_rate)
+            fs = FluidSynth('soundfonts/SNES.sf2', sample_rate=sample_rate)
             convert_midi_to_audio.sound_font = 'SNES / Super Nintendo'
         elif sf == 'n64':
-            fs = FluidSynth('n64_1.sf2', sample_rate=sample_rate)
+            fs = FluidSynth('soundfonts/n64_1.sf2', sample_rate=sample_rate)
             convert_midi_to_audio.sound_font = 'N64 / Nintendo 64'
         else:
-            fs = FluidSynth('generaluser_gs.sf2', sample_rate=sample_rate)
+            fs = FluidSynth('soundfonts/generaluser_gs.sf2', sample_rate=sample_rate)
             convert_midi_to_audio.sound_font = 'GeneralUser GS [Default]'
         fs.midi_to_audio(midi_path, './weed.wav')
         """
