@@ -100,7 +100,7 @@ async def play(ctx):
             await ctx.send("You are not connected to a voice channel.")
             raise commands.CommandError("Author not connected to a voice channel.")
     elif ctx.voice_client.is_playing():
-        await ctx.voice_client.stop()
+        ctx.voice_client.stop()
         await ctx.voice_client.disconnect()
 
 client.run(TOKEN)
