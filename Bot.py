@@ -28,7 +28,7 @@ async def on_command_error(ctx, error):
     raise error
 
 @client.command()
-@commands.cooldown(1, 10, commands.BucketType.guild)
+@commands.cooldown(1, 5, commands.BucketType.guild)
 async def convert(ctx, sf=None, sr=22050):
     channel = discord.utils.get(ctx.message.guild.channels, name='midi-player', type=discord.ChannelType.text)
     if ctx.message.channel != channel: return
@@ -84,7 +84,7 @@ async def convert(ctx, sf=None, sr=22050):
             break
 
 @client.command()
-@commands.cooldown(1, 5, commands.BucketType.guild)
+@commands.cooldown(1, 3, commands.BucketType.guild)
 async def play(ctx):
     channel = discord.utils.get(ctx.message.guild.channels, name='midi-player', type=discord.ChannelType.text)
     if ctx.message.channel != channel: return
@@ -96,6 +96,9 @@ async def play(ctx):
             await ctx.author.voice.channel.connect()
             source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('weed.wav'))
             ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
+            while not ctx.voice_client.is_playing():
+                await asyncio.sleep(1)
+            await ctx.voice_client.disconnect()
         else:
             await ctx.send("You are not connected to a voice channel.")
             raise commands.CommandError("Author not connected to a voice channel.")
