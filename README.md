@@ -1,5 +1,7 @@
 # discord-midi-player
  🎵 Simple Discord MIDI player, converts MIDI to WAV with sound font. 🎵
+ 
+**[BETA AS FUCC]**
 
 ## Content
 
@@ -15,6 +17,8 @@ In this repository, there are 4 sound fonts. You can additionally add yourself m
 | SNES.sf2            | Super Nintendo  | `snes`                     |
 
 ### Commands (that you can use for now)
+
+**NOTE:** in Discord, commands only work in `#midi-player` channel.
 
 Don't worry, I have other commands planned to implement. If I have time, I'll develop more commands in
 
@@ -44,5 +48,7 @@ To get it up and running, you first have to launch `bash setup.sh` to install al
 4. Something else I forgot lol
 
 I'll update the todo list from time to time.
+
+## 
 
 Alright, bye-bye :) Bluntano 2020
