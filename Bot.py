@@ -96,7 +96,7 @@ async def play(ctx):
             await ctx.author.voice.channel.connect()
             source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('weed.wav'))
             ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
-            while not ctx.voice_client.is_playing():
+            while ctx.voice_client.is_playing():
                 await asyncio.sleep(1)
             
             ctx.voice_client.stop()
