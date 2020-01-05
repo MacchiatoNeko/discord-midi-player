@@ -101,10 +101,26 @@ else
 	let "success++"
 fi
 
+## End result and final touches
+
 if [ $success -eq 4 ]; then
 	echo "${txtgrn}=== Packages are successfully installed ===${txtrst}"
 	echo "${txtcyn}=== chmod +x start.sh ===${txtrst}"
 	chmod +x start.sh
+	
+	echo "${txtcyn}=== Making rc.local file... ===${txtrst}" # for starting up whenever machine boots up
+	echo "" > /etc/rc.local
+	echo "#!/bin/sh -e" >> /etc/rc.local
+	echo "# rc.local" >> /etc/rc.local
+	echo "" >> /etc/rc.local
+	echo "cd $PWD" >> /etc/rc.local
+	echo "sh start.sh" >> /etc/rc.local
+	echo "" >> /etc/rc.local
+	echo "exit 0" >> /etc/rc.local
+	
+	chown root /etc/rc.local
+	chmod +x /etc/rc.local
+	
 	echo "${txtgrn}=== All done! Exiting the script... ===${txtrst}"
 elif [ $success -lt 4 ]; then
 	echo "${txtred}=== Some packages are not installed, please try again ===${txtrst}"
