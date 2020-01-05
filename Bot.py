@@ -13,9 +13,9 @@ import MIDIConverter as midic
 
 @client.event
 async def on_ready():
-    game = discord.Game("yes")
+    game = discord.Game("yes | [BETA]")
     await client.change_presence(status=discord.Status.idle, activity=game)
-    print("Weed is ready to serve!")
+    print("MIDI Player Ready")
 
 @client.event
 async def on_command_error(ctx, error):
