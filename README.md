@@ -33,6 +33,7 @@ DISCORD=<your app secret token>
 ```
 
 To get it up and running, you first have to launch `bash setup.sh` to install all required packages. After that you can simply launch `./start.sh`.
+
 **ANOTHER NOTE:** doesn't work on Windows, only on Debian or Ubuntu (as much as I've tested)
 
 ## TODO
@@ -44,6 +45,4 @@ To get it up and running, you first have to launch `bash setup.sh` to install al
 
 I'll update the todo list from time to time.
 
-==========================================================================
-Alright, bye-bye :)
-Bluntano 2020
+Alright, bye-bye :) Bluntano 2020
