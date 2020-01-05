@@ -98,6 +98,8 @@ async def play(ctx):
             ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
             while not ctx.voice_client.is_playing():
                 await asyncio.sleep(1)
+            
+            ctx.voice_client.stop()
             await ctx.voice_client.disconnect()
         else:
             await ctx.send("You are not connected to a voice channel.")
