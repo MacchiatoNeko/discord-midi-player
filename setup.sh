@@ -109,8 +109,7 @@ if [ $success -eq 4 ]; then
 	chmod +x start.sh
 	
 	echo "${txtcyn}=== Making rc.local file... ===${txtrst}" # for starting up whenever machine boots up
-	echo "" > /etc/rc.local
-	echo "#!/bin/sh -e" >> /etc/rc.local
+	echo "#!/bin/sh -e" > /etc/rc.local
 	echo "# rc.local" >> /etc/rc.local
 	echo "" >> /etc/rc.local
 	echo "cd $PWD" >> /etc/rc.local

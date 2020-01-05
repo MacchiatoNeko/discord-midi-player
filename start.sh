@@ -1,7 +1,7 @@
 pythonVersion=$(python3 --version)
 parsedVersion=$(echo $pythonVersion | sed 's/[^0-9]*//g') 
 
-if [[ $parsedVersion -gt "352" ]];
+if [[ $parsedVersion -ge "353" ]];
 then
     # Display Python code logs (Errors, printings, etc.)
     export PYTHONUNBUFFERED=true
