@@ -1,8 +1,7 @@
-pythonVersion=$(python3 --version)
-parsedVersion=$(echo $pythonVersion | sed 's/[^0-9]*//g') 
+currentVer=$(python3 --version)
+requiredVer="3.5.3"
 
-if [[ $parsedVersion -ge "353" ]];
-then
+if [ "$(printf '%s\n' "$requiredVer" "$currentVer" | sort -V | head -n1)" = "$requiredVer" ]; then
     # Display Python code logs (Errors, printings, etc.)
     export PYTHONUNBUFFERED=true
 
@@ -15,5 +14,5 @@ then
     # Finally, start the bot
     python3 Bot.py
 else
-    echo "## Failed to run! Make sure you have Python with a version greater than 3.5.2 ##"
+    echo "## Failed to run! Make sure you have Python with a version greater than 3.5.3 ##"
 fi
