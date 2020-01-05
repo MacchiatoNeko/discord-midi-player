@@ -112,8 +112,7 @@ if [ $success -eq 4 ]; then
 	echo "#!/bin/sh -e" > /etc/rc.local
 	echo "# rc.local" >> /etc/rc.local
 	echo "" >> /etc/rc.local
-	echo "cd $PWD" >> /etc/rc.local
-	echo "sh start.sh" >> /etc/rc.local
+	echo "cd $PWD && sh start.sh" >> /etc/rc.local
 	echo "" >> /etc/rc.local
 	echo "exit 0" >> /etc/rc.local
 	
