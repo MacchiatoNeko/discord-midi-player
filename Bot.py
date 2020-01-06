@@ -93,7 +93,7 @@ async def play(ctx):
 
         while ctx.voice_client.is_playing():
             await asyncio.sleep(1)
-            
+
         ctx.voice_client.stop()
         await ctx.voice_client.disconnect()
 
@@ -113,7 +113,7 @@ async def stop(ctx):
 async def pause(ctx):
 
     if ctx.voice_client.is_playing():
-        ctx.voice_client.stop()
+        ctx.voice_client.pause()
         await ctx.send("⏸️ Paused")
     elif ctx.voice_client.is_paused():
         await ctx.send("⏯️ Already paused")
