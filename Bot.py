@@ -82,6 +82,7 @@ class MIDI_player(commands.Cog):
     @commands.cooldown(1, cooldown_time, commands.BucketType.guild)
     async def stop(self, ctx):
         ctx.voice_client.stop()
+        await ctx.voice_client.disconnect()
         await ctx.send("⏹️ Stopped")
 
     @commands.command()
@@ -117,6 +118,14 @@ class MIDI_player(commands.Cog):
     @pause.before_invoke
     @stop.before_invoke
     @resume.before_invoke
+    async def ensure_channel(self, ctx):
+
+        channel = discord.utils.get(ctx.message.guild.channels, name='midi-player', type=discord.ChannelType.text)
+        if ctx.message.channel != channel: return
+        if ctx.message.author.bot: return
+        if ctx.message.author.id == client.user.id: return
+    
+    @play.before_invoke
     async def ensure_voice(self, ctx):
         if ctx.voice_client is None:
             if ctx.author.voice:
