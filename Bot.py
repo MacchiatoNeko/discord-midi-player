@@ -86,19 +86,16 @@ async def convert(ctx, sf=None, sr=22050):
 async def play(ctx):
 
     if ctx.voice_client is None:
-        if not ctx.voice_client.is_playing():
-            await ctx.author.voice.channel.connect()
-            source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('weed.wav'))
-            ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
-            await ctx.send("▶️ Playing")
+        await ctx.author.voice.channel.connect()
+        source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('weed.wav'))
+        ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
+        await ctx.send("▶️ Playing")
 
-            while ctx.voice_client.is_playing():
-                await asyncio.sleep(1)
+        while ctx.voice_client.is_playing():
+            await asyncio.sleep(1)
 
-            ctx.voice_client.stop()
-            await ctx.voice_client.disconnect()
-        else:
-            await ctx.send("▶️ Already playing")
+        ctx.voice_client.stop()
+        await ctx.voice_client.disconnect()
 
 @client.command()
 @commands.cooldown(1, cooldown_time, commands.BucketType.guild)
