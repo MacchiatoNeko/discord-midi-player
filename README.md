@@ -38,14 +38,22 @@ DISCORD=<your app secret token>
 
 To get it up and running, you first have to launch `bash setup.sh` to install all required packages. After that you can simply launch `./start.sh`.
 
+### What do you essentially need from packets?
+
+- Python with pip (minimum Python version 3.5.3 due to discord.py module requirement)
+- ffmpeg (for playing songs in voice channel)
+- Fluidsynth (for converting MIDI to WAV file)
+
 **ANOTHER NOTE:** doesn't work on Windows, only on Debian or Ubuntu (as much as I've tested)
 
 ## TODO
 
 1. Add more commands (like stop, pause, resume, repeat, etc.)
-2. `!convert` parameters, change there a bit
-3. Add queue system, and "Now playing" message
-4. Something else I forgot lol
+2. Add messages whenever the bot has stopped, or is playing, etc.
+3. `!convert` parameters, change there a bit
+4. Multiple server / guild system (plays different MIDI from the other guild)
+5. Add queue system
+6. Some else
 
 I'll update the todo list from time to time.
 
