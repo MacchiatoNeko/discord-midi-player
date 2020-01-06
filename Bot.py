@@ -11,6 +11,8 @@ client = commands.Bot(command_prefix = "!")
 
 import MIDIConverter as midic
 
+cooldown_time = 5
+
 @client.event
 async def on_ready():
     game = discord.Game("yes | [BETA]")
@@ -28,7 +30,7 @@ async def on_command_error(ctx, error):
     raise error
 
 @client.command()
-@commands.cooldown(1, 5, commands.BucketType.guild)
+@commands.cooldown(1, cooldown_time, commands.BucketType.guild)
 async def convert(ctx, sf=None, sr=22050):
     channel = discord.utils.get(ctx.message.guild.channels, name='midi-player', type=discord.ChannelType.text)
     if ctx.message.channel != channel: return
@@ -84,7 +86,7 @@ async def convert(ctx, sf=None, sr=22050):
             break
 
 @client.command()
-@commands.cooldown(1, 3, commands.BucketType.guild)
+@commands.cooldown(1, cooldown_time, commands.BucketType.guild)
 async def play(ctx):
     channel = discord.utils.get(ctx.message.guild.channels, name='midi-player', type=discord.ChannelType.text)
     if ctx.message.channel != channel: return
@@ -102,10 +104,63 @@ async def play(ctx):
             ctx.voice_client.stop()
             await ctx.voice_client.disconnect()
         else:
-            await ctx.send("You are not connected to a voice channel.")
-            raise commands.CommandError("Author not connected to a voice channel.")
-    elif ctx.voice_client.is_playing():
-        ctx.voice_client.stop()
-        await ctx.voice_client.disconnect()
+            await ctx.send("🚫 You are not connected to a voice channel!")
+            raise commands.CommandError("Author not connected to a voice channel")
+
+@client.command()
+@commands.cooldown(1, cooldown_time, commands.BucketType.guild)
+async def stop(ctx):
+    channel = discord.utils.get(ctx.message.guild.channels, name='midi-player', type=discord.ChannelType.text)
+    if ctx.message.channel != channel: return
+    if ctx.message.author.bot: return
+    if ctx.message.author.id == client.user.id: return
+
+    if ctx.author.voice:
+        if ctx.voice_client.is_playing():
+            ctx.voice_client.stop()
+            await ctx.voice_client.disconnect()
+            await ctx.send("⏹️ Stopped")
+        else:
+            await ctx.send("🔇 There is nothing playing at the moment!")
+    else:
+        await ctx.send("🚫 You are not connected to a voice channel!")
+
+@client.command()
+@commands.cooldown(1, cooldown_time, commands.BucketType.guild)
+async def pause(ctx):
+    channel = discord.utils.get(ctx.message.guild.channels, name='midi-player', type=discord.ChannelType.text)
+    if ctx.message.channel != channel: return
+    if ctx.message.author.bot: return
+    if ctx.message.author.id == client.user.id: return
+
+    if ctx.author.voice:
+        if ctx.voice_client.is_playing():
+            ctx.voice_client.pause()
+            await ctx.send("⏸️ Paused")
+        elif ctx.voice_client.is_paused():
+            await ctx.send("⏯️ Already paused")
+        else:
+            await ctx.send("🔇 There is nothing playing at the moment!")
+    else:
+        await ctx.send("🚫 You are not connected to a voice channel!")
+
+@client.command()
+@commands.cooldown(1, cooldown_time, commands.BucketType.guild)
+async def resume(ctx):
+    channel = discord.utils.get(ctx.message.guild.channels, name='midi-player', type=discord.ChannelType.text)
+    if ctx.message.channel != channel: return
+    if ctx.message.author.bot: return
+    if ctx.message.author.id == client.user.id: return
+
+    if ctx.author.voice:
+        if ctx.voice_client.is_paused():
+            ctx.voice_client.resume()
+            await ctx.send("▶️ Resuming")
+        elif ctx.voice_client.is_playing():
+            await ctx.send("⏯️ Already paused")
+        else:
+            await ctx.send("🔇 There is nothing playing at the moment!")
+    else:
+        await ctx.send("🚫 You are not connected to a voice channel!")
 
 client.run(TOKEN)

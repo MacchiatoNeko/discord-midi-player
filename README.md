@@ -25,7 +25,10 @@ Don't worry, I have other commands planned to implement. If I have time, I'll de
 | Commands                                                 | Description                           | Usage / Example         |
 | :------------------------------------------------------- | :------------------------------------ | :---------------------- |
 | !convert <sound font[optional]> <sample rate[optional]>  | Converts MIDI file to WAV audio file. | `!convert snes 22050`   |
-| !play                                                    | Plays and stops converted MIDI file.  | `!play`                 |
+| !play                                                    | Starts playing audio.                 | `!play`                 |
+| !stop                                                    | Stops playing audio.                  | `!stop`                 |
+| !pause                                                   | Pauses playing audio.                 | `!pause`                |
+| !resume                                                  | Resumes paused audio.                 | `!resume`               |
 
 Sample rate max - 44100 Hz; min - 8000 Hz.
 
