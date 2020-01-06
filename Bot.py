@@ -81,7 +81,7 @@ class MIDI_player(commands.Cog):
     @commands.command()
     @commands.cooldown(1, cooldown_time, commands.BucketType.guild)
     async def stop(self, ctx):
-        await ctx.voice_client.stop()
+        ctx.voice_client.stop()
         await ctx.send("⏹️ Stopped")
 
     @commands.command()
