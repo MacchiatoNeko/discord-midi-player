@@ -92,7 +92,6 @@ class MIDI_player(commands.Cog):
 
         if ctx.voice_client.is_playing():
             ctx.voice_client.stop()
-            await ctx.voice_client.disconnect()
             await ctx.send("⏹️ Stopped")
         else:
             await ctx.send("🔇 There is nothing playing at the moment!")
@@ -123,7 +122,7 @@ class MIDI_player(commands.Cog):
             ctx.voice_client.resume()
             await ctx.send("▶️ Resuming")
         else:
-            await ctx.send("🔇 There is nothing playing at the moment!")
+            await ctx.send("⏯️ Already playing")
 
     @convert.before_invoke
     @play.before_invoke
