@@ -86,16 +86,19 @@ async def convert(ctx, sf=None, sr=22050):
 async def play(ctx):
 
     if ctx.voice_client is None:
-        await ctx.author.voice.channel.connect()
-        source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('weed.wav'))
-        ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
-        await ctx.send("▶️ Playing")
+        if not ctx.voice_client.is_playing():
+            await ctx.author.voice.channel.connect()
+            source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('weed.wav'))
+            ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
+            await ctx.send("▶️ Playing")
 
-        while ctx.voice_client.is_playing():
-            await asyncio.sleep(1)
+            while ctx.voice_client.is_playing():
+                await asyncio.sleep(1)
 
-        ctx.voice_client.stop()
-        await ctx.voice_client.disconnect()
+            ctx.voice_client.stop()
+            await ctx.voice_client.disconnect()
+        else:
+            await ctx.send("▶️ Already playing")
 
 @client.command()
 @commands.cooldown(1, cooldown_time, commands.BucketType.guild)
@@ -112,22 +115,27 @@ async def stop(ctx):
 @commands.cooldown(1, cooldown_time, commands.BucketType.guild)
 async def pause(ctx):
 
-    if ctx.voice_client.is_playing():
+    song_playing = ctx.voice_client.is_playing()
+    paused = ctx.voice_client.is_paused()
+
+    if paused != True:
         ctx.voice_client.pause()
         await ctx.send("⏸️ Paused")
-    elif ctx.voice_client.is_paused():
-        await ctx.send("⏯️ Already paused")
     else:
-        await ctx.send("🔇 There is nothing playing at the moment!")
+        if song_playing == True:
+            await ctx.send("⏯️ Already paused")
+        else:
+            await ctx.send("🔇 There is nothing playing at the moment!")
 
 @client.command()
 @commands.cooldown(1, cooldown_time, commands.BucketType.guild)
 async def resume(ctx):
-    if ctx.voice_client.is_paused():
+
+    paused = ctx.voice_client.is_paused()
+
+    if paused == True:
         ctx.voice_client.resume()
         await ctx.send("▶️ Resuming")
-    elif ctx.voice_client.is_playing():
-        await ctx.send("▶️ Already playing")
     else:
         await ctx.send("🔇 There is nothing playing at the moment!")
 
@@ -136,7 +144,7 @@ async def resume(ctx):
 @stop.before_invoke
 @pause.before_invoke
 @resume.before_invoke
-async def ensure(ctx):
+async def ensure_voice(ctx):
 
     channel = discord.utils.get(ctx.message.guild.channels, name='midi-player', type=discord.ChannelType.text)
     if ctx.message.channel != channel: return
