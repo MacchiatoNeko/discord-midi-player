@@ -32,10 +32,6 @@ async def on_command_error(ctx, error):
 @client.command()
 @commands.cooldown(1, cooldown_time, commands.BucketType.guild)
 async def convert(ctx, sf=None, sr=22050):
-    channel = discord.utils.get(ctx.message.guild.channels, name='midi-player', type=discord.ChannelType.text)
-    if ctx.message.channel != channel: return
-    if ctx.message.author == client.user: return
-    if ctx.message.author.bot == True: return
     if ctx.message.attachments == []:
         message = await ctx.send("❌ No MIDI file in the attachment!")
         return
@@ -88,79 +84,66 @@ async def convert(ctx, sf=None, sr=22050):
 @client.command()
 @commands.cooldown(1, cooldown_time, commands.BucketType.guild)
 async def play(ctx):
-    channel = discord.utils.get(ctx.message.guild.channels, name='midi-player', type=discord.ChannelType.text)
-    if ctx.message.channel != channel: return
-    if ctx.message.author.bot: return
-    if ctx.message.author.id == client.user.id: return
 
     if ctx.voice_client is None:
-        if ctx.author.voice:
-            await ctx.author.voice.channel.connect()
-            source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('weed.wav'))
-            ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
-            await ctx.send("▶️ Playing")
-            while ctx.voice_client.is_playing():
-                await asyncio.sleep(1)
-            ctx.voice_client.stop()
-            await ctx.voice_client.disconnect()
-        else:
-            await ctx.send("🚫 You are not connected to a voice channel!")
-            raise commands.CommandError("Author not connected to a voice channel")
+        await ctx.author.voice.channel.connect()
+        source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('weed.wav'))
+        ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
+        await ctx.send("▶️ Playing")
+
+        while ctx.voice_client.is_playing():
+            await asyncio.sleep(1)
+            
+        ctx.voice_client.stop()
+        await ctx.voice_client.disconnect()
 
 @client.command()
 @commands.cooldown(1, cooldown_time, commands.BucketType.guild)
 async def stop(ctx):
-    channel = discord.utils.get(ctx.message.guild.channels, name='midi-player', type=discord.ChannelType.text)
-    if ctx.message.channel != channel: return
-    if ctx.message.author.bot: return
-    if ctx.message.author.id == client.user.id: return
 
-    if ctx.author.voice:
-        if ctx.voice_client.is_playing():
-            ctx.voice_client.stop()
-            await ctx.voice_client.disconnect()
-            await ctx.send("⏹️ Stopped")
-        else:
-            await ctx.send("🔇 There is nothing playing at the moment!")
+    if ctx.voice_client.is_playing():
+        ctx.voice_client.stop()
+        await ctx.voice_client.disconnect()
+        await ctx.send("⏹️ Stopped")
     else:
-        await ctx.send("🚫 You are not connected to a voice channel!")
+        await ctx.send("🔇 There is nothing playing at the moment!")
 
 @client.command()
 @commands.cooldown(1, cooldown_time, commands.BucketType.guild)
 async def pause(ctx):
-    channel = discord.utils.get(ctx.message.guild.channels, name='midi-player', type=discord.ChannelType.text)
-    if ctx.message.channel != channel: return
-    if ctx.message.author.bot: return
-    if ctx.message.author.id == client.user.id: return
 
-    if ctx.author.voice:
-        if ctx.voice_client.is_playing():
-            ctx.voice_client.stop()
-            await ctx.send("⏸️ Paused")
-        elif ctx.voice_client.is_paused():
-            await ctx.send("⏯️ Already paused")
-        else:
-            await ctx.send("🔇 There is nothing playing at the moment!")
+    if ctx.voice_client.is_playing():
+        ctx.voice_client.stop()
+        await ctx.send("⏸️ Paused")
+    elif ctx.voice_client.is_paused():
+        await ctx.send("⏯️ Already paused")
     else:
-        await ctx.send("🚫 You are not connected to a voice channel!")
+        await ctx.send("🔇 There is nothing playing at the moment!")
 
 @client.command()
 @commands.cooldown(1, cooldown_time, commands.BucketType.guild)
 async def resume(ctx):
+    if ctx.voice_client.is_paused():
+        ctx.voice_client.resume()
+        await ctx.send("▶️ Resuming")
+    elif ctx.voice_client.is_playing():
+        await ctx.send("▶️ Already playing")
+    else:
+        await ctx.send("🔇 There is nothing playing at the moment!")
+
+@convert.before_invoke
+@play.before_invoke
+@stop.before_invoke
+@pause.before_invoke
+@resume.before_invoke
+async def ensure(ctx):
+
     channel = discord.utils.get(ctx.message.guild.channels, name='midi-player', type=discord.ChannelType.text)
     if ctx.message.channel != channel: return
-    if ctx.message.author.bot: return
-    if ctx.message.author.id == client.user.id: return
+    if ctx.message.author == client.user: return
+    if ctx.message.author.bot == True: return
 
-    if ctx.author.voice:
-        if not ctx.voice_client.is_playing():
-            ctx.voice_client.resume()
-            await ctx.send("▶️ Resuming")
-        elif ctx.voice_client.is_playing():
-            await ctx.send("▶️ Already playing")
-        else:
-            await ctx.send("🔇 There is nothing playing at the moment!")
-    else:
+    if not ctx.author.voice:
         await ctx.send("🚫 You are not connected to a voice channel!")
 
 client.run(TOKEN)
