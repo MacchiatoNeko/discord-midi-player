@@ -98,9 +98,9 @@ async def play(ctx):
             await ctx.author.voice.channel.connect()
             source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('weed.wav'))
             ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
+            await ctx.send("▶️ Playing")
             while ctx.voice_client.is_playing():
                 await asyncio.sleep(1)
-            
             ctx.voice_client.stop()
             await ctx.voice_client.disconnect()
         else:
@@ -135,7 +135,7 @@ async def pause(ctx):
 
     if ctx.author.voice:
         if ctx.voice_client.is_playing():
-            ctx.voice_client.pause()
+            ctx.voice_client.stop()
             await ctx.send("⏸️ Paused")
         elif ctx.voice_client.is_paused():
             await ctx.send("⏯️ Already paused")
@@ -153,11 +153,11 @@ async def resume(ctx):
     if ctx.message.author.id == client.user.id: return
 
     if ctx.author.voice:
-        if ctx.voice_client.is_paused():
+        if not ctx.voice_client.is_playing():
             ctx.voice_client.resume()
             await ctx.send("▶️ Resuming")
         elif ctx.voice_client.is_playing():
-            await ctx.send("⏯️ Already paused")
+            await ctx.send("▶️ Already playing")
         else:
             await ctx.send("🔇 There is nothing playing at the moment!")
     else:
