@@ -74,27 +74,15 @@ class MIDI_player(commands.Cog):
     @commands.cooldown(1, cooldown_time, commands.BucketType.guild)
     async def play(self, ctx):
 
-        if ctx.voice_client is None:
-            await ctx.author.voice.channel.connect()
-            source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('weed.wav'))
-            ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
-            await ctx.send("▶️ Playing")
-
-            while ctx.voice_client.is_playing():
-                await asyncio.sleep(1)
-
-            ctx.voice_client.stop()
-            await ctx.voice_client.disconnect()
+        source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('weed.wav'))
+        ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
+        await ctx.send("▶️ Playing")
 
     @commands.command()
     @commands.cooldown(1, cooldown_time, commands.BucketType.guild)
     async def stop(self, ctx):
-
-        if ctx.voice_client.is_playing():
-            ctx.voice_client.stop()
-            await ctx.send("⏹️ Stopped")
-        else:
-            await ctx.send("🔇 There is nothing playing at the moment!")
+        await ctx.voice_client.stop()
+        await ctx.send("⏹️ Stopped")
 
     @commands.command()
     @commands.cooldown(1, cooldown_time, commands.BucketType.guild)
@@ -126,18 +114,17 @@ class MIDI_player(commands.Cog):
 
     @convert.before_invoke
     @play.before_invoke
-    @stop.before_invoke
     @pause.before_invoke
+    @stop.before_invoke
     @resume.before_invoke
     async def ensure_voice(self, ctx):
-
-        channel = discord.utils.get(ctx.message.guild.channels, name='midi-player', type=discord.ChannelType.text)
-        if ctx.message.channel != channel: return
-        if ctx.message.author == client.user: return
-        if ctx.message.author.bot == True: return
-
-        if not ctx.author.voice:
-            await ctx.send("🚫 You are not connected to a voice channel!")
+        if ctx.voice_client is None:
+            if ctx.author.voice:
+                await ctx.author.voice.channel.connect()
+            else:
+                await ctx.send("🚫 You are not connected to a voice channel!")
+    
+    
 
 @client.event
 async def on_ready():
