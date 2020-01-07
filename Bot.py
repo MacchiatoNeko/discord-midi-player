@@ -97,9 +97,9 @@ class MIDI_player(commands.Cog):
             await ctx.send("⏸️ Paused")
         else:
             if song_playing == True:
-                await ctx.send("⏯️ Already paused")
+                await ctx.send("▶️ Playing")
             else:
-                await ctx.send("🔇 There is nothing playing at the moment!")
+                await ctx.send("⏯️ Already paused")
 
     @commands.command()
     @commands.cooldown(1, cooldown_time, commands.BucketType.guild)
