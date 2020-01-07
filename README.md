@@ -18,8 +18,6 @@ In this repository, there are 4 sound fonts. You can additionally add yourself m
 
 ### Commands (that you can use for now)
 
-**NOTE:** in Discord, commands only work in `#midi-player` channel.
-
 Don't worry, I have other commands planned to implement. If I have time, I'll develop more commands in
 
 | Commands                                                 | Description                           | Usage / Example         |
