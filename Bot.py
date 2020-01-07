@@ -157,6 +157,13 @@ async def on_ready():
     print("MIDI Player Ready")
 
 @client.event
+async def on_guild_join(guild):
+    print("MIDI Player joined the new lobby:", guild)
+    channel = discord.utils.get(guild.channels, name="midi-player")
+    if not channel:
+        await guild.create_text_channel('midi-player')
+
+@client.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
         return
