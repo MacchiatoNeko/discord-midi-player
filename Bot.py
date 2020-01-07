@@ -11,7 +11,7 @@ client = commands.Bot(command_prefix = "!")
 
 import MIDIConverter as midic
 
-cooldown_time = 5
+cooldown_time = 3
 
 class MIDI_player(commands.Cog):
 
@@ -20,7 +20,7 @@ class MIDI_player(commands.Cog):
 
     @commands.command()
     @commands.cooldown(1, cooldown_time, commands.BucketType.guild)
-    async def convert(self, ctx, sf=None, sr=22050):
+    async def convert(self, ctx, arg1=None, arg2=None):
         if ctx.message.attachments == []:
             message = await ctx.send("❌ No MIDI file in the attachment!")
             return
@@ -31,30 +31,41 @@ class MIDI_player(commands.Cog):
         midic.detect_midi_file(link)
         if midic.detect_midi_file.is_midi == False:
             await message.edit(content="❌ Not a valid MIDI file!")
+            raise commands.CommandError("No valid MIDI file.")
             return
 
         soundfonts = ['megadrive', 'snes', 'n64']
 
-        if sf != None:
+        try:
+            arg2 = int(arg1)
+            arg1 = 'default'
+        except ValueError:
+            arg1 = arg1
             try:
-                k = soundfonts.index(sf)
-                sf = soundfonts[k]
+                arg2 = int(arg2)
+            except TypeError:
+                arg2 = 22050
             except ValueError:
-                sf = 'default'
-        
-        if not isinstance(sr, int):
-            await message.edit(content="❌ Not a valid sample rate!")
-            return
-        
-        if sr > 44100:
-            sr = 44100
-        if sr < 8000:
-            sr = 8000
+                await message.edit(content="❌ Not a valid sample rate!")
+                raise commands.CommandError("No valid sample rate.")
+                return
 
-        print('Converting with {} soundfont @ {} Hz...'.format(sf, sr))
+        if arg1 != None:
+            try:
+                k = soundfonts.index(arg1)
+                arg1 = soundfonts[k]
+            except ValueError:
+                arg1 = 'default'
+
+        if arg2 > 44100:
+            arg2 = 44100
+        if arg2 < 8000:
+            arg2 = 8000
+
+        print('Converting with {} soundfont @ {} Hz...'.format(arg1, arg2))
 
         await message.edit(content="♻️ Uploading...")
-        midic.convert_midi_to_audio(link, sf, sr)
+        midic.convert_midi_to_audio(link, arg1, arg2)
         while True:
             is_uploaded = midic.convert_midi_to_audio.is_downloaded
             if not is_uploaded:
@@ -114,26 +125,30 @@ class MIDI_player(commands.Cog):
             await ctx.send("⏯️ Already playing")
 
     @convert.before_invoke
-    @play.before_invoke
     @pause.before_invoke
     @stop.before_invoke
     @resume.before_invoke
     async def ensure_channel(self, ctx):
 
-        channel = discord.utils.get(ctx.message.guild.channels, name='midi-player', type=discord.ChannelType.text)
-        if ctx.message.channel != channel: return
-        if ctx.message.author.bot: return
-        if ctx.message.author.id == client.user.id: return
+        channel = discord.utils.get(ctx.message.guild.channels, name="midi-player")
+        if ctx.message.channel != channel:
+            raise commands.CommandError("{} typed in wrong channel.".format(ctx.message.author))
+        else:
+            if ctx.message.author.bot: raise commands.CommandError("Is a bot.")
+            if ctx.message.author.id == client.user.id: raise commands.CommandError("It's a-me, Mario!")
     
     @play.before_invoke
     async def ensure_voice(self, ctx):
-        if ctx.voice_client is None:
-            if ctx.author.voice:
-                await ctx.author.voice.channel.connect()
-            else:
-                await ctx.send("🚫 You are not connected to a voice channel!")
-    
-    
+
+        channel = discord.utils.get(ctx.message.guild.channels, name="midi-player")
+        if ctx.message.channel != channel:
+            raise commands.CommandError("{} typed in wrong channel.".format(ctx.message.author))
+        else:
+            if ctx.voice_client is None:
+                if ctx.author.voice:
+                    await ctx.author.voice.channel.connect()
+                else:
+                    await ctx.send("🚫 You are not connected to a voice channel!")
 
 @client.event
 async def on_ready():
@@ -147,6 +162,8 @@ async def on_command_error(ctx, error):
         return
     elif isinstance(error, commands.CommandNotFound):
         return
+    elif isinstance(error, commands.CommandError):
+        return print("Command error:", error)
     elif isinstance(error, commands.errors.BadArgument):
         return
     raise error
