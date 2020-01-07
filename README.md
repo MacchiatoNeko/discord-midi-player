@@ -51,12 +51,11 @@ To get it up and running, you first have to launch `bash setup.sh` to install al
 
 ## TODO
 
-1. Add more commands (like stop, pause, resume, repeat, etc.)
-2. Add messages whenever the bot has stopped, or is playing, etc.
-3. `!convert` parameters, change there a bit
-4. Multiple server / guild system (plays different MIDI from the other guild)
-5. Add queue system
-6. Some else
+1. Make commands only available in specific text channel like #midi-player
+2. `!convert` parameters, change there a bit
+3. Multiple server / guild system (plays different MIDI from the other guild)
+4. Add queue system
+5. Some else
 
 I'll update the todo list from time to time.
 
