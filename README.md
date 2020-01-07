@@ -21,7 +21,7 @@ In this repository, there are 4 sound fonts. You can additionally add yourself m
 Don't worry, I have other commands planned to implement. If I have time, I'll develop more commands in
 
 | Commands                                                 | Description                           | Usage / Example         |
-| :------------------------------------------------------- | :------------------------------------ | :---------------------- |
+| :------------------------------------------------------- | :------------------------------ | :---------------------------- |
 | !convert <sound font[optional]> <sample rate[optional]>  | Converts MIDI file to WAV audio file. | `!convert snes 22050` <br>`!convert megadrive` <br>`!convert 19200`   |
 | !play                                                    | Starts playing audio.                 | `!play`                 |
 | !stop                                                    | Stops playing audio.                  | `!stop`                 |
