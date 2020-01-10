@@ -13,7 +13,7 @@ def main(path=None):
         self.Error(400)
 
 def run_file_server():
-    app.run(host='0.0.0.0', port=8080)
+    app.run(port=8080)
 
 def run_it():
     server = Thread(target=run_file_server)
