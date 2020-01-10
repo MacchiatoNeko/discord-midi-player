@@ -11,6 +11,9 @@ client = commands.Bot(command_prefix = "!")
 
 import MIDIConverter as midic
 
+import KeepAlive
+KeepAlive.keep_alive()
+
 cooldown_time = 3
 
 class MIDI_player(commands.Cog):
