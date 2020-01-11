@@ -1,6 +1,19 @@
 import requests
 from midi2audio import FluidSynth
 
+# Dropbox stuff
+import dropbox
+
+from dotenv import load_dotenv
+load_dotenv(verbose=True)
+
+# Dropbox app token, taken from .env file
+token = os.getenv("DROPBOX")
+dbx = dropbox.Dropbox(token)
+
+# Boolean for to allow/deny uploading converted WAV file to Dropbox
+allow_dropbox_upload = False
+
 def detect_midi_file(discord_url):
     mid = ['MID', 'mid', 'Mid', 'MIDI', 'midi', 'Midi']
     if discord_url.endswith(tuple(mid)):
@@ -48,17 +61,19 @@ def convert_midi_to_audio(audio, sf, sample_rate):
             fs = FluidSynth('soundfonts/generaluser_gs.sf2', sample_rate=sample_rate)
             convert_midi_to_audio.sound_font = 'GeneralUser GS [Default]'
         fs.midi_to_audio(midi_path, './weed.wav')
-        """
-        with open('weed.wav', 'rb') as conv_midi:
-            try:
-                dbx.files_upload(conv_midi.read(), '/converted_audio/audio.wav', mute=True, autorename=True)
-                print('Uploading just converted midi file to Dropbox')
-                print('===========================================')
-            except Exception as err:
-                print('Error occured when uploading to Dropbox:', err)
-        """
         convert_midi_to_audio.is_converted = True
         return
+        
+        if allow_dropbox_upload:
+            print('Uploading just converted midi file to Dropbox')
+            print('===========================================')
+            with open('weed.wav', 'rb') as conv_midi:
+                try:
+                    dbx.files_upload(conv_midi.read(), '/converted_audio/audio.wav', mute=True, autorename=True)
+                    print("Uploaded")
+                except Exception as err:
+                    print('Error occured whilst uploading to Dropbox:', err)
+        
     except Exception as e:
         convert_midi_to_audio.is_converted = False
         convert_midi_to_audio.error = str(e)
