@@ -20,13 +20,13 @@ In this repository, there are 4 sound fonts. You can additionally add yourself m
 
 Don't worry, I have other commands planned to implement. If I have time, I'll develop more commands in
 
-| Commands                                                 | Description                           | Usage / Example         |
-| :---------------------------------------------- | :------------------------------ | :------------------------------------- |
-| !convert <sound font[optional]> <sample rate[optional]>  | Converts MIDI file to WAV audio file. | `!convert` <br>`!convert megadrive` <br>`!convert 19200` <br>`!convert snes 22050`   |
-| !play                                                    | Starts playing audio.                 | `!play`                 |
-| !stop                                                    | Stops playing audio.                  | `!stop`                 |
-| !pause                                                   | Pauses playing audio.                 | `!pause`                |
-| !resume                                                  | Resumes paused audio.                 | `!resume`               |
+| Commands                                                 | Description                           |
+| :------------------------------------------------------- | :------------------------------------ |
+| !convert <sound font and/or sample rate[optional]>       | Converts MIDI file to WAV audio file. |
+| !play                                                    | Starts playing audio.                 |
+| !stop                                                    | Stops playing audio.                  |
+| !pause                                                   | Pauses playing audio.                 |
+| !resume                                                  | Resumes paused audio.                 |
 
 Sample rate max - 44100 Hz; min - 8000 Hz.
 
