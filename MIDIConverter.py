@@ -1,6 +1,7 @@
 import os
 import requests
 from midi2audio import FluidSynth
+import json
 
 # Boolean for to allow/deny uploading converted WAV file to Dropbox
 allow_dropbox_upload = False
@@ -54,11 +55,11 @@ def convert_midi_to_audio(audio, sf, sample_rate, id):
             with open('guilds/{}/info.json'.format(id)) as f:
                 data = json.load(f)
                 upload_to_dropbox(id, data['filename'])
-        
     except Exception as e:
         convert_midi_to_audio.is_converted = False
         convert_midi_to_audio.error = str(e)
         return print("Error occured:", e)
+
 class upload_to_dropbox:
     def __init__(self, id, name):
         self.id = id
