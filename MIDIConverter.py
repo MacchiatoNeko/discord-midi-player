@@ -14,13 +14,13 @@ def detect_midi_file(discord_url):
         detect_midi_file.is_midi = False
         return
 
-def convert_midi_to_audio(audio, sf, sample_rate):
+def convert_midi_to_audio(audio, sf, sample_rate, id):
     '''Convert MIDI file into audio'''
     '''audio - midi file to convert'''
     '''sf - sound font'''
     '''sample_rate - sample rate when converting into wav'''
 
-    midi_path = './midi_to_convert.mid'
+    midi_path = 'guilds/{}/midi_to_convert.mid'.format(id)
 
     headers = {
         'User-agent': 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0'
@@ -48,7 +48,7 @@ def convert_midi_to_audio(audio, sf, sample_rate):
         else:
             fs = FluidSynth('soundfonts/generaluser_gs.sf2', sample_rate=sample_rate)
             
-        fs.midi_to_audio(midi_path, './weed.wav')
+        fs.midi_to_audio(midi_path, 'guilds/{}/song.wav'.format(id))
         convert_midi_to_audio.is_converted = True
         
         if allow_dropbox_upload:

@@ -1,4 +1,5 @@
 import os
+import json
 
 from dotenv import load_dotenv
 load_dotenv(verbose=True)
@@ -25,7 +26,11 @@ class MIDI_player(commands.Cog):
             message = await ctx.send("❌ No MIDI file in the attachment!")
             return
 
-        link = ctx.message.attachments[0].url
+        attached_file = ctx.message.attachments[0]
+        link = attached_file.url
+        name = attached_file.filename
+        server_id = ctx.message.guild.id
+
         message = await ctx.send("⏳ Checking the file...")
 
         midic.detect_midi_file(link)
@@ -65,10 +70,12 @@ class MIDI_player(commands.Cog):
         if arg2 < 8000:
             arg2 = 8000
 
+        add_to_json(name, server_id)
+
         print('Converting with {} soundfont @ {} Hz...'.format(arg1, arg2))
 
         await message.edit(content="♻️ Uploading...")
-        midic.convert_midi_to_audio(link, arg1, arg2)
+        midic.convert_midi_to_audio(link, arg1, arg2, server_id)
         while True:
             is_uploaded = midic.convert_midi_to_audio.is_downloaded
             if not is_uploaded:
@@ -87,10 +94,17 @@ class MIDI_player(commands.Cog):
     @commands.command()
     @commands.cooldown(1, cooldown_time, commands.BucketType.guild)
     async def play(self, ctx):
+        server = ctx.message.guild.id
+        try:
+            with open('guilds/{}/info.json'.format(server)) as f:
 
-        source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('weed.wav'))
-        ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
-        await ctx.send("▶️ Playing")
+                data = json.load(f)
+                await ctx.send("▶️ Now Playing: `{}`".format(data['filename']))
+                
+                source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('guilds/{}/song.wav'.format(server)))
+                ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
+        except FileNotFoundError:
+            await ctx.send("❗ Convert something first!")
 
     @commands.command()
     @commands.cooldown(1, cooldown_time, commands.BucketType.guild)
@@ -177,6 +191,21 @@ async def on_command_error(ctx, error):
     elif isinstance(error, commands.errors.BadArgument):
         return
     raise error
+
+class add_to_json:
+    def __init__(self, name, id):
+        self.name = name
+        self.id = id
+
+        try:
+            os.makedirs("guilds/{}/".format(self.id))
+        except FileExistsError:
+            pass
+
+        conv_dict = {'filename': self.name}
+        with open('guilds/{}/info.json'.format(self.id), 'w') as json_file:
+            json.dump(conv_dict, json_file)
+        return
 
 client.add_cog(MIDI_player(client))
 client.run(TOKEN)
