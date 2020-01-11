@@ -22,7 +22,7 @@ Don't worry, I have other commands planned to implement. If I have time, I'll de
 
 | Commands                                                 | Description                           | Usage / Example         |
 | :---------------------------------------------- | :------------------------------ | :------------------------------------- |
-| !convert <sound font[optional]> <sample rate[optional]>  | Converts MIDI file to WAV audio file. | `!convert snes 22050` <br>`!convert megadrive` <br>`!convert 19200`   |
+| !convert <sound font[optional]> <sample rate[optional]>  | Converts MIDI file to WAV audio file. | `!convert` <br>`!convert megadrive` <br>`!convert 19200` <br>`!convert snes 22050`   |
 | !play                                                    | Starts playing audio.                 | `!play`                 |
 | !stop                                                    | Stops playing audio.                  | `!stop`                 |
 | !pause                                                   | Pauses playing audio.                 | `!pause`                |
@@ -35,6 +35,7 @@ Sample rate max - 44100 Hz; min - 8000 Hz.
 Before you do anything, make a new `.env` file with the content:
 ```
 DISCORD=<your app secret token>
+DROPBOX=<your app secret token [optional if you want audio to be uploaded to Dropbox]>
 ```
 
 To get it up and running, you first have to launch `bash setup.sh` to install all required packages. After that you can simply launch `./start.sh`.
@@ -50,9 +51,8 @@ To get it up and running, you first have to launch `bash setup.sh` to install al
 ## TODO
 
 1. Custom prefix per server
-2. Different playing MIDI per server (more dynamic)
-3. Add queue system
-4. yes!
+2. Add queue system
+3. big chungus
 
 I'll update the todo list from time to time.
 
