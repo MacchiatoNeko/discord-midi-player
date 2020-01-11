@@ -1,5 +1,4 @@
 .vscode
 __pycache__
 .env
-midi_to_convert.mid
-weed.wav
+guilds/
