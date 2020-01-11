@@ -49,6 +49,9 @@ class MIDI_player(commands.Cog):
                 await message.edit(content="❌ Not a valid sample rate!")
                 raise commands.CommandError("No valid sample rate.")
                 return
+        except TypeError:
+            arg1 = 'default'
+            arg2 = 22050
 
         if arg1 != None:
             try:
