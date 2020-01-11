@@ -120,7 +120,12 @@ if [ $success -eq 4 ]; then
 	
 	chown root /etc/rc.local
 	chmod +x /etc/rc.local
-	
+
+	echo "${txtcyn}=== Adding tail -f /tmp/rc.local.log to .bashrc file... ===${txtrst}"
+	echo "" >> ~/.bashrc
+	echo "# Checking rc.local logs when logging onto machine" >> ~/.bashrc
+	echo "tail -f /tmp/rc.local.log" >> ~/.bashrc
+
 	echo "${txtgrn}=== All done! Exiting the script... ===${txtrst}"
 elif [ $success -lt 4 ]; then
 	echo "${txtred}=== Some packages are not installed, please try again ===${txtrst}"
