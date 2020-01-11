@@ -50,29 +50,35 @@ def convert_midi_to_audio(audio, sf, sample_rate, id):
             
         fs.midi_to_audio(midi_path, 'guilds/{}/song.wav'.format(id))
         convert_midi_to_audio.is_converted = True
-        
         if allow_dropbox_upload:
-
-            from dotenv import load_dotenv
-            load_dotenv(verbose=True)
-
-            import dropbox
-
-            token = os.getenv("DROPBOX")
-            dbx = dropbox.Dropbox(token)
-
-            print('Uploading just converted midi file to Dropbox')
-            print('===========================================')
-            with open('weed.wav', 'rb') as conv_midi:
-                try:
-                    dbx.files_upload(conv_midi.read(), '/converted_audio/audio.wav', mute=True, autorename=True)
-                    print("Uploaded")
-                except Exception as err:
-                    print('Error occured whilst uploading to Dropbox:', err)
-        
-        return
+            with open('guilds/{}/info.json'.format(id)) as f:
+                data = json.load(f)
+                upload_to_dropbox(id, data['filename'])
         
     except Exception as e:
         convert_midi_to_audio.is_converted = False
         convert_midi_to_audio.error = str(e)
         return print("Error occured:", e)
+class upload_to_dropbox:
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
+        self.local_path = 'guilds/{}/song.wav'.format(id)
+        self.upload_path = '/converted_audio/{}/{}.wav'.format(id, name)
+
+        from dotenv import load_dotenv
+        load_dotenv(verbose=True)
+
+        import dropbox
+
+        token = os.getenv("DROPBOX")
+        dbx = dropbox.Dropbox(token)
+
+        print('Uploading just converted midi file to Dropbox')
+        print('===========================================')
+        with open(self.local_path, 'rb') as conv_midi:
+            try:
+                dbx.files_upload(conv_midi.read(), self.upload_path, mute=True, autorename=True)
+                print("Uploaded")
+            except Exception as err:
+                print('Error occured whilst uploading to Dropbox:', err)
