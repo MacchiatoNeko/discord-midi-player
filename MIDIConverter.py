@@ -50,7 +50,6 @@ def convert_midi_to_audio(audio, sf, sample_rate):
             
         fs.midi_to_audio(midi_path, './weed.wav')
         convert_midi_to_audio.is_converted = True
-        return
         
         if allow_dropbox_upload:
 
@@ -70,6 +69,8 @@ def convert_midi_to_audio(audio, sf, sample_rate):
                     print("Uploaded")
                 except Exception as err:
                     print('Error occured whilst uploading to Dropbox:', err)
+        
+        return
         
     except Exception as e:
         convert_midi_to_audio.is_converted = False
