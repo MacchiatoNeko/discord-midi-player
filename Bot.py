@@ -100,7 +100,7 @@ class MIDI_player(commands.Cog):
 
                 data = json.load(f)
                 await ctx.send("▶️ Now Playing: `{}`".format(data['filename']))
-                
+
                 source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('guilds/{}/song.wav'.format(server)))
                 ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
         except FileNotFoundError:
@@ -169,7 +169,7 @@ class MIDI_player(commands.Cog):
 
 @client.event
 async def on_ready():
-    game = discord.Game("yes | [BETA]")
+    game = discord.Game("lol | [BETA]")
     await client.change_presence(status=discord.Status.idle, activity=game)
     print("MIDI Player Ready")
 
