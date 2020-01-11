@@ -1,15 +1,6 @@
+import os
 import requests
 from midi2audio import FluidSynth
-
-# Dropbox stuff
-import dropbox
-
-from dotenv import load_dotenv
-load_dotenv(verbose=True)
-
-# Dropbox app token, taken from .env file
-token = os.getenv("DROPBOX")
-dbx = dropbox.Dropbox(token)
 
 # Boolean for to allow/deny uploading converted WAV file to Dropbox
 allow_dropbox_upload = False
@@ -50,21 +41,27 @@ def convert_midi_to_audio(audio, sf, sample_rate):
     try:
         if sf == 'megadrive':
             fs = FluidSynth('soundfonts/megadrive.sf2', sample_rate=sample_rate)
-            convert_midi_to_audio.sound_font = 'Megadrive / Sega Genesis'
         elif sf == 'snes':
             fs = FluidSynth('soundfonts/SNES.sf2', sample_rate=sample_rate)
-            convert_midi_to_audio.sound_font = 'SNES / Super Nintendo'
         elif sf == 'n64':
             fs = FluidSynth('soundfonts/n64_1.sf2', sample_rate=sample_rate)
-            convert_midi_to_audio.sound_font = 'N64 / Nintendo 64'
         else:
             fs = FluidSynth('soundfonts/generaluser_gs.sf2', sample_rate=sample_rate)
-            convert_midi_to_audio.sound_font = 'GeneralUser GS [Default]'
+            
         fs.midi_to_audio(midi_path, './weed.wav')
         convert_midi_to_audio.is_converted = True
         return
         
         if allow_dropbox_upload:
+
+            from dotenv import load_dotenv
+            load_dotenv(verbose=True)
+
+            import dropbox
+
+            token = os.getenv("DROPBOX")
+            dbx = dropbox.Dropbox(token)
+
             print('Uploading just converted midi file to Dropbox')
             print('===========================================')
             with open('weed.wav', 'rb') as conv_midi:
