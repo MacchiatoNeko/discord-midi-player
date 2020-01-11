@@ -1,16 +1,13 @@
 from threading import Thread
-from flask import Flask, send_file
+from flask import Flask, send_file, jsonify
 app = Flask(__name__)
 
 @app.route("/<path>")
 def main(path=None):
-    if path is None:
-        self.Error(400)
     try:
         return send_file(path, as_attachment=True)
     except Exception as e:
-        self.log.exception(e)
-        self.Error(400)
+        return jsonify({'error': str(e)})
 
 def run_file_server():
     app.run(host='0.0.0.0', port=80)
