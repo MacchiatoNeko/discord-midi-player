@@ -145,15 +145,6 @@ class MIDI_player(commands.Cog):
     @pause.before_invoke
     @stop.before_invoke
     @resume.before_invoke
-    async def ensure_channel(self, ctx):
-
-        channel = discord.utils.get(ctx.message.guild.channels, name="midi-player")
-        if ctx.message.channel != channel:
-            raise commands.CommandError("{} typed in wrong channel.".format(ctx.message.author))
-        else:
-            if ctx.message.author.bot: raise commands.CommandError("Is a bot.")
-            if ctx.message.author.id == client.user.id: raise commands.CommandError("It's a-me, Mario!")
-    
     @play.before_invoke
     async def ensure_voice(self, ctx):
 
@@ -161,11 +152,21 @@ class MIDI_player(commands.Cog):
         if ctx.message.channel != channel:
             raise commands.CommandError("{} typed in wrong channel.".format(ctx.message.author))
         else:
+            if ctx.message.author.bot: raise commands.CommandError("Is a bot.")
+            if ctx.message.author.id == client.user.id: raise commands.CommandError("It's a-me, Mario!")
             if ctx.voice_client is None:
                 if ctx.author.voice:
                     await ctx.author.voice.channel.connect()
                 else:
                     await ctx.send("🚫 You are not connected to a voice channel!")
+                    raise commands.CommandError("{} is not connected to voice channel.".format(ctx.message.author))
+            else:
+                if not ctx.author.voice:
+                    await ctx.send("🚫 You are not connected to a voice channel!")
+                    raise commands.CommandError("{} is not connected to voice channel.".format(ctx.message.author))
+                if ctx.author.voice.channel != ctx.voice_client.channel:
+                    await ctx.send("🚫 Already connected to another voice channel. Sorry!")
+                    raise commands.CommandError("Already connected to voice channel.")
 
 @client.event
 async def on_ready():
@@ -188,9 +189,6 @@ async def on_command_error(ctx, error):
         return
     elif isinstance(error, commands.CommandError):
         return print("Command error:", error)
-    elif isinstance(error, commands.errors.BadArgument):
-        return
-    raise error
 
 class add_to_json:
     def __init__(self, name, id):
