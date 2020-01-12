@@ -46,11 +46,9 @@ To get it up and running, you first have to launch `bash setup.sh` to install al
 - ffmpeg (for playing songs in voice channel)
 - Fluidsynth (for converting MIDI to WAV file)
 
+**NOTE**: Works fine on Ubuntu 18.04 instance (AWS - Amazon Web Service). And `setup.sh` has a choice to make the bot work on instance startup, and log the bot's output when logging into the instance.
+
 **ANOTHER NOTE:** doesn't work on Windows, only on Debian or Ubuntu (as much as I've tested)
-
-### AWS (Amazon Web Services)
-
-This repository's setup script (`setup.sh`) automates everything according to the AWS instance. It automatically makes `rc.local` file with commands in them + adds `tail -f /tmp/rc.local.log` to the `.bashrc` file at the end (when logging in, you'll see the bot output logs pretty much). I'll work on it so you could have a choice not to, if you don't want to nor have no root user access.
 
 ## TODO
 
