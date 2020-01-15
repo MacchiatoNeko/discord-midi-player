@@ -70,7 +70,7 @@ class MIDI_player(commands.Cog):
         if arg2 < 8000:
             arg2 = 8000
 
-        add_to_json(name, server_id)
+        add_to_json(name, server_id).write_json_file()
 
         print('Converting with {} soundfont @ {} Hz...'.format(arg1, arg2))
 
@@ -81,11 +81,6 @@ class MIDI_player(commands.Cog):
             if not is_uploaded:
                 error = midic.convert_midi_to_audio.error
                 await message.edit(content="❗ Uploading failed:\n`{}`".format(error))
-                break
-            is_converted = midic.convert_midi_to_audio.is_converted
-            if not is_converted:
-                error = midic.convert_midi_to_audio.error
-                await message.edit(content="❗ Converting failed:\n`{}`".format(error))
                 break
             else:
                 await message.edit(content="✅ MIDI file converted!")
@@ -170,8 +165,8 @@ class MIDI_player(commands.Cog):
 
 @client.event
 async def on_ready():
-    game = discord.Game("lol | [BETA]")
-    await client.change_presence(status=discord.Status.idle, activity=game)
+    game = discord.Game("MIDI Player v1.42")
+    await client.change_presence(activity=game)
     print("MIDI Player Ready")
 
 @client.event
@@ -194,7 +189,8 @@ class add_to_json:
     def __init__(self, name, id):
         self.name = name
         self.id = id
-
+    
+    def write_json_file(self):
         try:
             os.makedirs("guilds/{}/".format(self.id))
         except FileExistsError:

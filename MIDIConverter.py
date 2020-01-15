@@ -16,10 +16,6 @@ def detect_midi_file(discord_url):
         return
 
 def convert_midi_to_audio(audio, sf, sample_rate, id):
-    '''Convert MIDI file into audio'''
-    '''audio - midi file to convert'''
-    '''sf - sound font'''
-    '''sample_rate - sample rate when converting into wav'''
 
     midi_path = 'guilds/{}/midi_to_convert.mid'.format(id)
 
@@ -32,14 +28,7 @@ def convert_midi_to_audio(audio, sf, sample_rate, id):
             for chunk in r.iter_content(chunk_size=1024):
                 if chunk:
                     f.write(chunk)
-        convert_midi_to_audio.is_downloaded = True
-    except Exception as e:
-        print('Err:', e)
-        convert_midi_to_audio.is_downloaded = False
-        convert_midi_to_audio.error = str(e)
-        return
 
-    try:
         if sf == 'megadrive':
             fs = FluidSynth('soundfonts/megadrive.sf2', sample_rate=sample_rate)
         elif sf == 'snes':
@@ -54,19 +43,22 @@ def convert_midi_to_audio(audio, sf, sample_rate, id):
         if allow_dropbox_upload:
             with open('guilds/{}/info.json'.format(id)) as f:
                 data = json.load(f)
-                upload_to_dropbox(id, data['filename'])
+                audio = audio_to_dropbox(id, data['filename'])
+                audio.upload_audio()
     except Exception as e:
+        print('Err:', e)
         convert_midi_to_audio.is_converted = False
         convert_midi_to_audio.error = str(e)
-        return print("Error occured:", e)
+        return
 
-class upload_to_dropbox:
+class audio_to_dropbox:
     def __init__(self, id, name):
         self.id = id
         self.name = name
         self.local_path = 'guilds/{}/song.wav'.format(id)
         self.upload_path = '/converted_audio/{}/{}.wav'.format(id, name)
-
+    
+    def upload_audio(self):
         from dotenv import load_dotenv
         load_dotenv(verbose=True)
 
