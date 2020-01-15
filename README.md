@@ -1,7 +1,5 @@
 # discord-midi-player
  🎵 Simple Discord MIDI player, converts MIDI to WAV with sound font. 🎵
- 
-**[BETA AS FUCC]**
 
 ## Content
 
@@ -52,10 +50,9 @@ To get it up and running, you first have to launch `bash setup.sh` to install al
 
 ## TODO
 
-1. Setup script a bit more dynamic
-2. Add queue system
-3. Custom bot prefix per server
-4. memes
+1. Add queue system
+2. Custom bot prefix per server
+3. 420 blaze it lmao
 
 I'll update the todo list from time to time.
 
