@@ -77,7 +77,7 @@ class MIDI_player(commands.Cog):
         await message.edit(content="♻️ Uploading...")
         midic.convert_midi_to_audio(link, arg1, arg2, server_id)
         while True:
-            is_uploaded = midic.convert_midi_to_audio.is_downloaded
+            is_uploaded = midic.convert_midi_to_audio.is_converted
             if not is_uploaded:
                 error = midic.convert_midi_to_audio.error
                 await message.edit(content="❗ Uploading failed:\n`{}`".format(error))
