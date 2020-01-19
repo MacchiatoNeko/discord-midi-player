@@ -20,11 +20,13 @@ Don't worry, I have other commands planned to implement. If I have time, I'll de
 
 | Commands                                                 | Description                           |
 | :------------------------------------------------------- | :------------------------------------ |
-| !convert <sound font and/or sample rate[optional]>       | Converts MIDI file to WAV audio file. |
+| !convert <sound font and/or sample rate[optional]>       | Converts MIDI file to WAV audio file, and add to the queue |
 | !play                                                    | Starts playing audio.                 |
 | !stop                                                    | Stops playing audio.                  |
 | !pause                                                   | Pauses playing audio.                 |
 | !resume                                                  | Resumes paused audio.                 |
+| !skip                                                    | Skips current playing song.           |
+| !queue                                                   | Displays tracks being queued.         |
 
 Sample rate max - 44100 Hz; min - 8000 Hz.
 
@@ -50,9 +52,9 @@ To get it up and running, you first have to launch `bash setup.sh` to install al
 
 ## TODO
 
-1. Add queue system
+1. Improve the queue system
 2. Custom bot prefix per server
-3. 420 blaze it lmao
+3. retarded knuckles
 
 I'll update the todo list from time to time.
 

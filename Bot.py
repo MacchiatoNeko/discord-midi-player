@@ -1,5 +1,6 @@
 import os
 import json
+import shutil
 
 from dotenv import load_dotenv
 load_dotenv(verbose=True)
@@ -13,6 +14,7 @@ client = commands.Bot(command_prefix = "!")
 import MIDIConverter as midic
 
 cooldown_time = 3
+guilds_list = {}
 
 class MIDI_player(commands.Cog):
 
@@ -75,7 +77,7 @@ class MIDI_player(commands.Cog):
         print('Converting with {} soundfont @ {} Hz...'.format(arg1, arg2))
 
         await message.edit(content="♻️ Uploading...")
-        midic.convert_midi_to_audio(link, arg1, arg2, server_id)
+        midic.convert_midi_to_audio(link, arg1, arg2, server_id, name)
         while True:
             is_uploaded = midic.convert_midi_to_audio.is_converted
             if not is_uploaded:
@@ -84,29 +86,38 @@ class MIDI_player(commands.Cog):
                 break
             else:
                 await message.edit(content="✅ MIDI file converted!")
+                guilds_list[server_id]['queue'].append(name)
                 break
 
     @commands.command()
     @commands.cooldown(1, cooldown_time, commands.BucketType.guild)
     async def play(self, ctx):
         server = ctx.message.guild.id
+
+        def after_playing(err):
+            if len(guilds_list[server]['queue']) > 0:
+                guilds_list[server]['queue'].pop(0)
+                next_song = guilds_list[server]['queue'][0]
+                source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('guilds/{}/{}.wav'.format(server, next_song)))
+                ctx.voice_client.play(source, after=after_playing)
+
         try:
-            with open('guilds/{}/info.json'.format(server)) as f:
-
-                data = json.load(f)
-                await ctx.send("▶️ Now Playing: `{}`".format(data['filename']))
-
-                source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('guilds/{}/song.wav'.format(server)))
-                ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
-        except FileNotFoundError:
-            await ctx.send("❗ Convert something first!")
+            current = guilds_list[server]['queue'][0]
+            audio_source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('guilds/{}/{}.wav'.format(server, current)))
+            await ctx.send("▶️ Now Playing: `{}`".format(current))
+            ctx.voice_client.play(audio_source, after=after_playing)
+        except IndexError:
+            await ctx.send("⏹️ Queue is empty")
 
     @commands.command()
     @commands.cooldown(1, cooldown_time, commands.BucketType.guild)
     async def stop(self, ctx):
+        guild = ctx.message.guild.id
         ctx.voice_client.stop()
-        await ctx.voice_client.disconnect()
         await ctx.send("⏹️ Stopped")
+        shutil.rmtree('guilds/{}/'.format(guild))
+        await ctx.voice_client.disconnect()
+        guilds_list[guild]['queue'] = []
 
     @commands.command()
     @commands.cooldown(1, cooldown_time, commands.BucketType.guild)
@@ -135,12 +146,50 @@ class MIDI_player(commands.Cog):
             await ctx.send("▶️ Resuming")
         else:
             await ctx.send("⏯️ Already playing")
+    
+    @commands.command()
+    @commands.cooldown(1, 2, commands.BucketType.guild)
+    async def skip(self, ctx):
+        server = ctx.message.guild.id
+
+        def after_playing(err):
+            if len(guilds_list[server]['queue']) > 0:
+                guilds_list[server]['queue'].pop(0)
+                next_song = guilds_list[server]['queue'][0]
+                source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('guilds/{}/{}.wav'.format(server, next_song)))
+                ctx.voice_client.play(source, after=after_playing)
+
+        try:
+            ctx.voice_client.stop()
+            guilds_list[server]['queue'].pop(0)
+            next_song = guilds_list[server]['queue'][0]
+            message = "▶️ Now Playing: `{}`".format(next_song)
+            audio_source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('guilds/{}/{}.wav'.format(server, next_song)))
+            ctx.voice_client.play(audio_source, after=after_playing)
+        except IndexError:
+            message = "⏹️ Queue is empty"
+        await ctx.send(message)
+
+    @commands.command()
+    @commands.cooldown(1, 2, commands.BucketType.guild)
+    async def queue(self, ctx):
+        server = ctx.message.guild.id
+        if guilds_list[server]['queue'] == []:
+            message = "⏹️ Queue is empty"
+        else:
+            counter = 1
+            message = "***Queue:***\n"
+            for i in guilds_list[server]['queue']:
+                message += "{}. *{}*\n".format(counter, i)
+                counter += 1
+        await ctx.send(message)
 
     @convert.before_invoke
     @pause.before_invoke
     @stop.before_invoke
     @resume.before_invoke
     @play.before_invoke
+    @skip.before_invoke
     async def ensure_voice(self, ctx):
 
         channel = discord.utils.get(ctx.message.guild.channels, name="midi-player")
@@ -167,6 +216,8 @@ class MIDI_player(commands.Cog):
 async def on_ready():
     game = discord.Game("MIDI Player v1.42")
     await client.change_presence(activity=game)
+    for guild in client.guilds:
+        guilds_list[guild.id] = {'queue': []}
     print("MIDI Player Ready")
 
 @client.event
@@ -175,6 +226,7 @@ async def on_guild_join(guild):
     channel = discord.utils.get(guild.channels, name="midi-player")
     if not channel:
         await guild.create_text_channel('midi-player')
+    guilds_list[guild.id]['queue'] = []
 
 @client.event
 async def on_command_error(ctx, error):
@@ -183,7 +235,8 @@ async def on_command_error(ctx, error):
     elif isinstance(error, commands.CommandNotFound):
         return
     elif isinstance(error, commands.CommandError):
-        return print("Command error:", error)
+        print("Command error:", error)
+        raise error
 
 class add_to_json:
     def __init__(self, name, id):
@@ -196,7 +249,7 @@ class add_to_json:
         except FileExistsError:
             pass
 
-        conv_dict = {'filename': self.name}
+        conv_dict = {'guild_id': self.id, 'filename': self.name}
         with open('guilds/{}/info.json'.format(self.id), 'w') as json_file:
             json.dump(conv_dict, json_file)
         return
