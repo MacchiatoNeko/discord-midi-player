@@ -15,9 +15,10 @@ def detect_midi_file(discord_url):
         detect_midi_file.is_midi = False
         return
 
-def convert_midi_to_audio(audio, sf, sample_rate, id):
+def convert_midi_to_audio(audio, sf, sample_rate, id, name):
 
     midi_path = 'guilds/{}/midi_to_convert.mid'.format(id)
+    info_path = 'guilds/{}/info.json'.format(id)
 
     headers = {
         'User-agent': 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0'
@@ -37,14 +38,23 @@ def convert_midi_to_audio(audio, sf, sample_rate, id):
             fs = FluidSynth('soundfonts/n64_1.sf2', sample_rate=sample_rate)
         else:
             fs = FluidSynth('soundfonts/generaluser_gs.sf2', sample_rate=sample_rate)
-            
-        fs.midi_to_audio(midi_path, 'guilds/{}/song.wav'.format(id))
+        
+        if not os.path.exists('guilds/{}/{}.wav'.format(id, name)):
+            fs.midi_to_audio(midi_path, 'guilds/{}/{}.wav'.format(id, name))
+        else:
+            print("/{}/{}.wav already exists!".format(id, name))
         convert_midi_to_audio.is_converted = True
+
+        os.remove(midi_path)
+
         if allow_dropbox_upload:
             with open('guilds/{}/info.json'.format(id)) as f:
                 data = json.load(f)
                 audio = audio_to_dropbox(id, data['filename'])
                 audio.upload_audio()
+
+        os.remove(info_path)
+        
     except Exception as e:
         print('Err:', e)
         convert_midi_to_audio.is_converted = False
@@ -55,7 +65,7 @@ class audio_to_dropbox:
     def __init__(self, id, name):
         self.id = id
         self.name = name
-        self.local_path = 'guilds/{}/song.wav'.format(id)
+        self.local_path = 'guilds/{}/{}.wav'.format(id, name)
         self.upload_path = '/converted_audio/{}/{}.wav'.format(id, name)
     
     def upload_audio(self):
