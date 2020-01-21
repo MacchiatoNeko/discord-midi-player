@@ -18,7 +18,7 @@ fi
 
 # For making /etc/rc.local file
 
-rc_local () {
+function rc_local {
 	echo "${txtcyn}=== Making rc.local file... ===${txtrst}" # for starting up whenever machine boots up
 	echo "#!/bin/sh -e" > /etc/rc.local
 	echo "# rc.local" >> /etc/rc.local
@@ -133,7 +133,7 @@ if [ $success -eq 4 ]; then
 	chmod +x start.sh
 	
 	while true; do
-		read -p "Do you wish to launch the bot whenever the machine starts up?" yn
+		read -p "Do you wish to launch the bot whenever the machine starts up? [Y/n] " yn
 		case $yn in
 			[Yy]* ) rc_local; break;;
 			[Nn]* ) exit;;
