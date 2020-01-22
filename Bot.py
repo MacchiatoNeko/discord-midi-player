@@ -16,6 +16,35 @@ import MIDIConverter as midic
 cooldown_time = 3
 guilds_list = {}
 
+async def play_music(ctx):
+
+    def check_queue(error):
+        try:
+            guilds_list[ctx.guild.id]['queue'].pop(0)
+            player = guilds_list[ctx.guild.id]['queue'][0]
+            audio_source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('guilds/{}/{}.wav'.format(ctx.guild.id, player)))
+            ctx.voice_client.play(audio_source, after=check_queue)
+            client.loop.create_task(
+                ctx.send("▶️ Now Playing: `{}`".format(player)))
+        except IndexError:
+            shutil.rmtree('guilds/{}/'.format(ctx.guild.id))
+            guilds_list[ctx.guild.id]['queue'] = []
+            client.loop.create_task(
+                ctx.send("⏹️ Queue is empty"))
+
+    if len(guilds_list[ctx.guild.id]['queue']) != 0:
+        if ctx.voice_client is None:
+            if ctx.author.voice:
+                await ctx.author.voice.channel.connect()
+
+        current = guilds_list[ctx.guild.id]['queue'][0]
+        audio_source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('guilds/{}/{}.wav'.format(ctx.guild.id, current)))
+        ctx.voice_client.play(audio_source, after=check_queue)
+        await ctx.send("▶️ Now Playing: `{}`".format(current))
+    else:
+        await ctx.send("⏹️ Queue is empty. You should add something first!")
+        return
+
 class MIDI_player(commands.Cog):
 
     def __init__(self, client):
@@ -75,6 +104,8 @@ class MIDI_player(commands.Cog):
         add_to_json(name, server_id).write_json_file()
 
         print('Converting with {} soundfont @ {} Hz...'.format(arg1, arg2))
+        if arg1 != 'default':
+            name = '{}_{}'.format(arg1, name)
 
         await message.edit(content="♻️ Uploading...")
         midic.convert_midi_to_audio(link, arg1, arg2, server_id, name)
@@ -92,22 +123,7 @@ class MIDI_player(commands.Cog):
     @commands.command()
     @commands.cooldown(1, cooldown_time, commands.BucketType.guild)
     async def play(self, ctx):
-        server = ctx.message.guild.id
-
-        def after_playing(err):
-            if len(guilds_list[server]['queue']) > 0:
-                guilds_list[server]['queue'].pop(0)
-                next_song = guilds_list[server]['queue'][0]
-                source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('guilds/{}/{}.wav'.format(server, next_song)))
-                ctx.voice_client.play(source, after=after_playing)
-
-        try:
-            current = guilds_list[server]['queue'][0]
-            audio_source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('guilds/{}/{}.wav'.format(server, current)))
-            await ctx.send("▶️ Now Playing: `{}`".format(current))
-            ctx.voice_client.play(audio_source, after=after_playing)
-        except IndexError:
-            await ctx.send("⏹️ Queue is empty")
+        await play_music(ctx)
 
     @commands.command()
     @commands.cooldown(1, cooldown_time, commands.BucketType.guild)
@@ -115,7 +131,10 @@ class MIDI_player(commands.Cog):
         guild = ctx.message.guild.id
         ctx.voice_client.stop()
         await ctx.send("⏹️ Stopped")
-        shutil.rmtree('guilds/{}/'.format(guild))
+        try:
+            shutil.rmtree('guilds/{}/'.format(guild))
+        except FileNotFoundError:
+            pass
         await ctx.voice_client.disconnect()
         guilds_list[guild]['queue'] = []
 
@@ -151,24 +170,8 @@ class MIDI_player(commands.Cog):
     @commands.cooldown(1, 2, commands.BucketType.guild)
     async def skip(self, ctx):
         server = ctx.message.guild.id
-
-        def after_playing(err):
-            if len(guilds_list[server]['queue']) > 0:
-                guilds_list[server]['queue'].pop(0)
-                next_song = guilds_list[server]['queue'][0]
-                source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('guilds/{}/{}.wav'.format(server, next_song)))
-                ctx.voice_client.play(source, after=after_playing)
-
-        try:
-            ctx.voice_client.stop()
-            guilds_list[server]['queue'].pop(0)
-            next_song = guilds_list[server]['queue'][0]
-            message = "▶️ Now Playing: `{}`".format(next_song)
-            audio_source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('guilds/{}/{}.wav'.format(server, next_song)))
-            ctx.voice_client.play(audio_source, after=after_playing)
-        except IndexError:
-            message = "⏹️ Queue is empty"
-        await ctx.send(message)
+        ctx.voice_client.stop()
+        await play_music(server, ctx)
 
     @commands.command()
     @commands.cooldown(1, 2, commands.BucketType.guild)
@@ -190,6 +193,7 @@ class MIDI_player(commands.Cog):
     @resume.before_invoke
     @play.before_invoke
     @skip.before_invoke
+    @queue.before_invoke
     async def ensure_voice(self, ctx):
 
         channel = discord.utils.get(ctx.message.guild.channels, name="midi-player")
@@ -199,9 +203,7 @@ class MIDI_player(commands.Cog):
             if ctx.message.author.bot: raise commands.CommandError("Is a bot.")
             if ctx.message.author.id == client.user.id: raise commands.CommandError("It's a-me, Mario!")
             if ctx.voice_client is None:
-                if ctx.author.voice:
-                    await ctx.author.voice.channel.connect()
-                else:
+                if not ctx.author.voice:
                     await ctx.send("🚫 You are not connected to a voice channel!")
                     raise commands.CommandError("{} is not connected to voice channel.".format(ctx.message.author))
             else:
@@ -214,7 +216,7 @@ class MIDI_player(commands.Cog):
 
 @client.event
 async def on_ready():
-    game = discord.Game("MIDI Player v1.42")
+    game = discord.Game("MIDIs (v1.69-lol)")
     await client.change_presence(activity=game)
     for guild in client.guilds:
         guilds_list[guild.id] = {'queue': []}
@@ -236,7 +238,6 @@ async def on_command_error(ctx, error):
         return
     elif isinstance(error, commands.CommandError):
         print("Command error:", error)
-        raise error
 
 class add_to_json:
     def __init__(self, name, id):
