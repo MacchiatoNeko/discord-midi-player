@@ -52,9 +52,8 @@ To get it up and running, you first have to launch `bash setup.sh` to install al
 
 ## TODO
 
-1. Improve the queue system
-2. Custom bot prefix per server
-3. retarded knuckles
+1. Custom bot prefix per server
+2. world war III
 
 I'll update the todo list from time to time.
 
