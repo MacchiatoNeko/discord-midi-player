@@ -64,11 +64,11 @@ async def play_music(ctx, skip_command=False):
             if ctx.voice_client.is_playing():
                 await ctx.send("▶️ Already playing!")
                 raise commands.CommandError("Bot on guild with the id of {} already playing.")
-    else:
-        try:
-            guilds_list[ctx.guild.id]['queue'].pop(0)
-        except IndexError:
-            pass
+    # else:
+    #     try:
+    #         guilds_list[ctx.guild.id]['queue'].pop(0)
+    #     except IndexError:
+    #         pass
 
     if len(guilds_list[ctx.guild.id]['queue']) > 0:
         current = guilds_list[ctx.guild.id]['queue'][0]
