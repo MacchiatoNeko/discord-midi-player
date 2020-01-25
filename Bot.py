@@ -43,6 +43,9 @@ async def play_music(ctx, skip_command=False):
             try:
                 up_next = guilds_list[ctx.guild.id]['queue'][1]
                 message += "\n\n⏭️ Up next: `{}`".format(up_next)
+            except IndexError:
+                pass
+            try:
                 guilds_list[ctx.guild.id]['queue'].pop(0)
             except IndexError:
                 pass
@@ -64,11 +67,6 @@ async def play_music(ctx, skip_command=False):
             if ctx.voice_client.is_playing():
                 await ctx.send("▶️ Already playing!")
                 raise commands.CommandError("Bot on guild with the id of {} already playing.")
-    # else:
-    #     try:
-    #         guilds_list[ctx.guild.id]['queue'].pop(0)
-    #     except IndexError:
-    #         pass
 
     if len(guilds_list[ctx.guild.id]['queue']) > 0:
         current = guilds_list[ctx.guild.id]['queue'][0]
@@ -79,9 +77,14 @@ async def play_music(ctx, skip_command=False):
         try:
             up_next = guilds_list[ctx.guild.id]['queue'][1]
             message += "\n\n⏭️ Up next: `{}`".format(up_next)
+        except IndexError:
+            pass
+
+        try:
             guilds_list[ctx.guild.id]['queue'].pop(0)
         except IndexError:
             pass
+
         await ctx.send(message)
     else:
         if skip_command is False:
