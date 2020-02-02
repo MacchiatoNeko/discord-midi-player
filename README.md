@@ -11,7 +11,7 @@ In this repository, there are 4 sound fonts. You can additionally add yourself m
 | :------------------ | :-------------- | :------------------------- |
 | generaluser_gs.sf2  | Default         | `[Whatever you type there]`|
 | megadrive.sf2       | Sega Genesis    | `megadrive`                |
-| n64_1.sf2           | Nintendo 64     | `n64`                      |
+| n64_2-0.sf2         | Nintendo 64     | `n64`                      |
 | SNES.sf2            | Super Nintendo  | `snes`                     |
 
 ### Commands (that you can use for now)

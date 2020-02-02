@@ -35,7 +35,7 @@ def convert_midi_to_audio(audio, sf, sample_rate, id, name):
         elif sf == 'snes':
             fs = FluidSynth('soundfonts/SNES.sf2', sample_rate=sample_rate)
         elif sf == 'n64':
-            fs = FluidSynth('soundfonts/n64_1.sf2', sample_rate=sample_rate)
+            fs = FluidSynth('soundfonts/n64_2-0.sf2', sample_rate=sample_rate)
         else:
             fs = FluidSynth('soundfonts/generaluser_gs.sf2', sample_rate=sample_rate)
         
