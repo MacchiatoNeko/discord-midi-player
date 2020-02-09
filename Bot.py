@@ -99,7 +99,7 @@ class MIDI_player(commands.Cog):
     @commands.cooldown(1, cooldown_time, commands.BucketType.guild)
     async def convert(self, ctx, arg1=None, arg2=None):
         if ctx.message.attachments == []:
-            message = await ctx.send("❌ No MIDI file in the attachment!")
+            await ctx.send("❌ No MIDI file in the attachment!")
             return
 
         attached_file = ctx.message.attachments[0]
@@ -113,7 +113,6 @@ class MIDI_player(commands.Cog):
         if midic.detect_midi_file.is_midi == False:
             await message.edit(content="❌ Not a valid MIDI file!")
             raise commands.CommandError("No valid MIDI file.")
-            return
 
         soundfonts = ['megadrive', 'snes', 'n64']
 
@@ -121,7 +120,6 @@ class MIDI_player(commands.Cog):
             arg2 = int(arg1)
             arg1 = 'default'
         except ValueError:
-            arg1 = arg1
             try:
                 arg2 = int(arg2)
             except TypeError:
@@ -129,7 +127,6 @@ class MIDI_player(commands.Cog):
             except ValueError:
                 await message.edit(content="❌ Not a valid sample rate!")
                 raise commands.CommandError("No valid sample rate.")
-                return
         except TypeError:
             arg1 = 'default'
             arg2 = 22050
@@ -218,7 +215,6 @@ class MIDI_player(commands.Cog):
     @commands.command()
     @commands.cooldown(1, 2, commands.BucketType.guild)
     async def skip(self, ctx):
-        server = ctx.message.guild.id
         ctx.voice_client.stop()
         await asyncio.sleep(0.5)
         await play_music(ctx, True)
