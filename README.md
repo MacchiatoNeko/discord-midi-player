@@ -27,6 +27,8 @@ Don't worry, I have other commands planned to implement. If I have time, I'll de
 | !resume                                                  | Resumes paused audio.                 |
 | !skip                                                    | Skips current playing song.           |
 | !queue                                                   | Displays tracks being queued.         |
+| !help                                                    | Shows commands                        |
+| !soundfonts                                              | Shows soundfonts                      |
 
 Sample rate max - 44100 Hz; min - 8000 Hz.
 
@@ -53,7 +55,7 @@ To get it up and running, you first have to launch `bash setup.sh` to install al
 ## TODO
 
 1. Custom bot prefix per server
-2. world war III
+2. lego city resque helicopter
 
 I'll update the todo list from time to time.
 

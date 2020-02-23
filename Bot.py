@@ -233,6 +233,38 @@ class MIDI_player(commands.Cog):
                 counter += 1
         await ctx.send(message)
 
+    @commands.command()
+    @commands.cooldown(1, 2, commands.BucketType.guild)
+    async def help(self, ctx):
+        cmds = [
+        "!convert <sound font and/or sample rate[optional]>",
+        "!play",
+        "!stop",
+        "!pause",
+        "!resume",
+        "!skip",
+        "!queue",
+        "!soundfonts"
+        ]
+        message = "***Commands:***\n"
+        for i in cmds:
+            message += "{}\n".format(i)
+        await ctx.send(message)
+
+    @commands.command()
+    @commands.cooldown(1, 2, commands.BucketType.guild)
+    async def soundfonts(self, ctx):
+        sfs = [
+        "default <when nothing is passed> (**GeneralUser GS**)",
+        "megadrive (**Sega Genesis**)",
+        "n64 (**Nintendo 64**)",
+        "snes (**Super Nintendo**)"
+        ]
+        message = "***Sound fonts:***\n"
+        for i in sfs:
+            message += "{}\n".format(i)
+        await ctx.send(message)
+
     @convert.before_invoke
     @pause.before_invoke
     @stop.before_invoke
@@ -260,6 +292,16 @@ class MIDI_player(commands.Cog):
                     await ctx.send("🚫 Already connected to another voice channel. Sorry!")
                     raise commands.CommandError("Already connected to voice channel.")
 
+    @help.before_invoke
+    @soundfonts.before_invoke
+    async def ensure_channel(self, ctx):
+        channel = discord.utils.get(ctx.message.guild.channels, name="midi-player")
+        if ctx.message.channel != channel:
+            raise commands.CommandError("{} typed in wrong channel.".format(ctx.message.author))
+        else:
+            if ctx.message.author.bot: raise commands.CommandError("Is a bot.")
+            if ctx.message.author.id == client.user.id: raise commands.CommandError("It's a-me, Mario!")
+
 @client.event
 async def on_ready():
     game = discord.Game("MIDIs (v1.69-lol)")
@@ -285,5 +327,6 @@ async def on_command_error(ctx, error):
     elif isinstance(error, commands.CommandError):
         print("Command error:", error)
 
+client.remove_command("help")
 client.add_cog(MIDI_player(client))
 client.run(TOKEN)
