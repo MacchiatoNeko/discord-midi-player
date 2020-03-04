@@ -316,7 +316,12 @@ async def on_guild_join(guild):
     channel = discord.utils.get(guild.channels, name="midi-player")
     if not channel:
         await guild.create_text_channel('midi-player')
-    guilds_list[guild.id]['queue'] = []
+    guilds_list[guild.id] = {'queue': []}
+
+@client.event
+async def on_guild_leave(guild):
+    print("MIDI Player left the lobby:", guild)
+    del guilds_list[guild.id]
 
 @client.event
 async def on_command_error(ctx, error):
