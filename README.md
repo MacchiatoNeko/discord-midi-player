@@ -18,19 +18,20 @@ In this repository, there are 4 sound fonts. You can additionally add yourself m
 
 ### Commands (that you can use for now)
 
-Don't worry, I have other commands planned to implement. If I have time, I'll develop more commands in
+Bot's default prefix is set as `midi.`. Every server can change their own prefix with the `midi.prefix <your new prefix>` command.
 
-| Commands                                                 | Description                           |
-| :------------------------------------------------------- | :------------------------------------ |
-| !convert <sound font and/or sample rate[optional]>       | Converts MIDI file to WAV audio file, and add to the queue |
-| !play                                                    | Starts playing audio.                 |
-| !stop                                                    | Stops playing audio.                  |
-| !pause                                                   | Pauses playing audio.                 |
-| !resume                                                  | Resumes paused audio.                 |
-| !skip                                                    | Skips current playing song.           |
-| !queue                                                   | Displays tracks being queued.         |
-| !help                                                    | Shows commands                        |
-| !soundfonts                                              | Shows soundfonts                      |
+| Commands                                                        | Description                           |
+| :-------------------------------------------------------------- | :------------------------------------ |
+| <prefix>convert <sound font and/or sample rate[optional]>       | Converts MIDI file to WAV audio file, and add to the queue |
+| <prefix>play                                                    | Starts playing audio.                 |
+| <prefix>stop                                                    | Stops playing audio.                  |
+| <prefix>pause                                                   | Pauses playing audio.                 |
+| <prefix>resume                                                  | Resumes paused audio.                 |
+| <prefix>skip                                                    | Skips current playing song.           |
+| <prefix>queue                                                   | Displays tracks being queued.         |
+| <prefix>help                                                    | Shows commands                        |
+| <prefix>soundfonts                                              | Shows soundfonts                      |
+| <prefix>prefix <custom prefix>                                  | Changes bot's prefix on the server    |
 
 Sample rate max - 44100 Hz; min - 8000 Hz.
 
@@ -40,6 +41,8 @@ Before you do anything, make a new `.env` file with the content:
 ```
 DISCORD=<your app secret token>
 DROPBOX=<your app secret token [optional if you want audio to be uploaded to Dropbox]>
+MONGODB_HOST=<your MongoDB host, can be localhost>
+MONGODB_PORT=<your MongoDB port, can be 27017>
 ```
 
 To get it up and running, you first have to launch `bash setup.sh` to install all required packages. After that you can simply launch `./start.sh`.
@@ -49,15 +52,21 @@ To get it up and running, you first have to launch `bash setup.sh` to install al
 - Python with pip (minimum Python version 3.5.3 due to discord.py module requirement)
 - ffmpeg (for playing songs in voice channel)
 - Fluidsynth (for converting MIDI to WAV file)
+- MongoDB (for database storage)
+
+I would highly recommend changing the MongoDB's hosting port for safety concerns.
+
+To start MongoDB service immediately after setup, all you have to enter is `sudo systemctl start mongod`.
+
+If you don't like to have MongoDB server on the same machine, you can disable it with `sudo systemctl disable mongod` and stop it by replacing disable with stop in the command.
 
 **NOTE**: Works fine on Ubuntu 18.04 instance (AWS - Amazon Web Service). And `setup.sh` has a choice to make the bot work on instance startup, and log the bot's output when logging into the instance.
 
-**ANOTHER NOTE:** doesn't work on Windows, only on Debian or Ubuntu (as much as I've tested)
+**ANOTHER NOTE:** doesn't work on Windows, only on Debian or Ubuntu (as much as I've tested). Debian has issue with setup shell code so, you may need to install packages manually.
 
 ## TODO
 
-1. Custom bot prefix per server
-2. lego city resque helicopter
+- nothing on the list currently, bug fixes once I find them.
 
 I'll update the todo list from time to time.
 
