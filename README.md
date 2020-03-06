@@ -22,16 +22,16 @@ Bot's default prefix is set as `midi.`. Every server can change their own prefix
 
 | Commands                                                        | Description                           |
 | :-------------------------------------------------------------- | :------------------------------------ |
-| <prefix>convert <sound font and/or sample rate[optional]>       | Converts MIDI file to WAV audio file, and add to the queue |
-| <prefix>play                                                    | Starts playing audio.                 |
-| <prefix>stop                                                    | Stops playing audio.                  |
-| <prefix>pause                                                   | Pauses playing audio.                 |
-| <prefix>resume                                                  | Resumes paused audio.                 |
-| <prefix>skip                                                    | Skips current playing song.           |
-| <prefix>queue                                                   | Displays tracks being queued.         |
-| <prefix>help                                                    | Shows commands                        |
-| <prefix>soundfonts                                              | Shows soundfonts                      |
-| <prefix>prefix <custom prefix>                                  | Changes bot's prefix on the server    |
+| `<prefix>convert <sound font and/or sample rate[optional]>`     | Converts MIDI file to WAV audio file, and add to the queue |
+| `<prefix>play`                                                  | Starts playing audio.                 |
+| `<prefix>stop`                                                  | Stops playing audio.                  |
+| `<prefix>pause`                                                 | Pauses playing audio.                 |
+| `<prefix>resume`                                                | Resumes paused audio.                 |
+| `<prefix>skip`                                                  | Skips current playing song.           |
+| `<prefix>queue`                                                 | Displays tracks being queued.         |
+| `<prefix>help`                                                  | Shows commands                        |
+| `<prefix>soundfonts`                                            | Shows soundfonts                      |
+| `<prefix>prefix <custom prefix>`                                | Changes bot's prefix on the server    |
 
 Sample rate max - 44100 Hz; min - 8000 Hz.
 
