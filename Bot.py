@@ -1,17 +1,81 @@
 import os
 import json
 import shutil
+import pymongo
 
 from dotenv import load_dotenv
 load_dotenv(verbose=True)
+
+import MIDIConverter as midic
+
+cooldown_time = 3
+guilds_list = {}
+
+MONGODB_HOST = os.getenv("MONGODB_HOST")
+MONGODB_PORT = os.getenv("MONGODB_PORT")
+
+db_client = pymongo.MongoClient(MONGODB_HOST, int(MONGODB_PORT))
+dblist = db_client.list_database_names()
+if not "guild_database" in dblist:
+    db = db_client["guild_database"]
+    guild_col = db["guilds"]
+else:
+    print("=== guild_database exists ===")
+    guild_col = db_client["guild_database"]["guilds"]
+
+async def determine_prefix(client, message):
+    guild = message.guild
+    prefix = guild_col.find_one({ "guild_id": guild.id }, { "prefix": 1, "_id": 0 })
+    prefix = prefix['prefix']
+    return prefix
 
 TOKEN = os.getenv("DISCORD")
 import discord
 import asyncio
 from discord.ext import commands
-client = commands.Bot(command_prefix = "!")
+client = commands.Bot(command_prefix=determine_prefix)
 
-import MIDIConverter as midic
+@client.event
+async def on_ready():
+    game = discord.Game("MIDI Player")
+    await client.change_presence(activity=game)
+    for guild in client.guilds:
+        guilds_list[guild.id] = {'name': guild.name, 'queue': []}
+        
+        myquery = { "guild_id": guild.id }
+        mydoc = guild_col.find_one(myquery)
+        
+        if not mydoc:
+            guild_col.insert_one({"guild_id": guild.id, "prefix": "midi."})
+    # for x in guild_col.find():
+    #     print(x)
+    print("MIDI Player Ready")
+
+@client.event
+async def on_guild_join(guild):
+    print("MIDI Player joined the new lobby:", guild)
+    # channel = discord.utils.get(guild.channels, name="midi-player")
+    # if not channel:
+    #     await guild.create_text_channel('midi-player')
+    guild_col.insert_one({"guild_id": guild.id, "prefix": "midi."})    
+    guilds_list[guild.id] = {'name': guild.name, 'queue': []}
+
+@client.event
+async def on_guild_remove(guild):
+    print("MIDI Player was removed/left the lobby:", guild)
+    del guilds_list[guild.id]
+    guild_col.delete_one({"guild_id": guild.id})
+
+@client.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        return
+    elif isinstance(error, commands.CommandNotFound):
+        return
+    elif isinstance(error, commands.MissingPermissions):
+        await ctx.send("🚫 You're missing permissions for that command!")
+    elif isinstance(error, commands.CommandError):
+        print("Command error:", error)
 
 class add_to_json:
     def __init__(self, name, id):
@@ -28,9 +92,6 @@ class add_to_json:
         with open('guilds/{}/info.json'.format(self.id), 'w') as json_file:
             json.dump(conv_dict, json_file)
         return
-
-cooldown_time = 3
-guilds_list = {}
 
 async def play_music(ctx, skip_command=False):
 
@@ -218,6 +279,19 @@ class MIDI_player(commands.Cog):
         ctx.voice_client.stop()
         await asyncio.sleep(0.5)
         await play_music(ctx, True)
+    
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def prefix(self, ctx, prefix=None):
+        server_id = ctx.message.guild.id
+        pfx = guild_col.find_one({ "guild_id": server_id }, { "prefix": 1, "_id": 0 })
+        pfx = pfx['prefix']
+        if not prefix:
+            await ctx.send(f"❌ Please enter your prefix, like this: `{pfx}prefix <your custom prefix>`")
+            raise commands.CommandError("No prefix entered.")
+        
+        guild_col.update_one({ "guild_id": server_id }, { "$set": { "prefix": prefix }})
+        await ctx.send(f"✅ Updated this server's prefix to `{prefix}`")
 
     @commands.command()
     @commands.cooldown(1, 2, commands.BucketType.guild)
@@ -237,18 +311,25 @@ class MIDI_player(commands.Cog):
     @commands.cooldown(1, 2, commands.BucketType.guild)
     async def help(self, ctx):
         cmds = [
-        "!convert <sound font and/or sample rate[optional]>",
-        "!play",
-        "!stop",
-        "!pause",
-        "!resume",
-        "!skip",
-        "!queue",
-        "!soundfonts"
+        "{pfx}convert <sound font and/or sample rate[optional]>",
+        "{pfx}play",
+        "{pfx}stop",
+        "{pfx}pause",
+        "{pfx}resume",
+        "{pfx}skip",
+        "{pfx}queue",
+        "{pfx}soundfonts",
+        "{pfx}prefix <custom prefix>"
         ]
+
+        pfx = guild_col.find_one({ "guild_id": ctx.message.guild.id }, { "prefix": 1, "_id": 0 })
+        pfx = pfx['prefix']
+
         message = "***Commands:***\n"
+        message += "```\n"
         for i in cmds:
-            message += "{}\n".format(i)
+            message += "{}\n".format(i.format(pfx=pfx))
+        message += "```"
         await ctx.send(message)
 
     @commands.command()
@@ -261,8 +342,10 @@ class MIDI_player(commands.Cog):
         "snes (**Super Nintendo**)"
         ]
         message = "***Sound fonts:***\n"
+        message += "```\n"
         for i in sfs:
             message += "{}\n".format(i)
+        message += "```"
         await ctx.send(message)
 
     @convert.before_invoke
@@ -274,63 +357,34 @@ class MIDI_player(commands.Cog):
     @queue.before_invoke
     async def ensure_everything(self, ctx):
 
-        channel = discord.utils.get(ctx.message.guild.channels, name="midi-player")
-        if ctx.message.channel != channel:
-            raise commands.CommandError("{} typed in wrong channel.".format(ctx.message.author))
+        # channel = discord.utils.get(ctx.message.guild.channels, name="midi-player")
+        # if ctx.message.channel != channel:
+        #     raise commands.CommandError("{} typed in wrong channel.".format(ctx.message.author))
+        # else:
+        if ctx.message.author.bot: raise commands.CommandError("Is a bot.")
+        if ctx.message.author.id == client.user.id: raise commands.CommandError("It's a-me, Mario!")
+        if ctx.voice_client is None:
+            if not ctx.author.voice:
+                await ctx.send("🚫 You are not connected to a voice channel!")
+                raise commands.CommandError("{} is not connected to voice channel.".format(ctx.message.author))
         else:
-            if ctx.message.author.bot: raise commands.CommandError("Is a bot.")
-            if ctx.message.author.id == client.user.id: raise commands.CommandError("It's a-me, Mario!")
-            if ctx.voice_client is None:
-                if not ctx.author.voice:
-                    await ctx.send("🚫 You are not connected to a voice channel!")
-                    raise commands.CommandError("{} is not connected to voice channel.".format(ctx.message.author))
-            else:
-                if not ctx.author.voice:
-                    await ctx.send("🚫 You are not connected to a voice channel!")
-                    raise commands.CommandError("{} is not connected to voice channel.".format(ctx.message.author))
-                if ctx.author.voice.channel != ctx.voice_client.channel:
-                    await ctx.send("🚫 Already connected to another voice channel. Sorry!")
-                    raise commands.CommandError("Already connected to voice channel.")
+            if not ctx.author.voice:
+                await ctx.send("🚫 You are not connected to a voice channel!")
+                raise commands.CommandError("{} is not connected to voice channel.".format(ctx.message.author))
+            if ctx.author.voice.channel != ctx.voice_client.channel:
+                await ctx.send("🚫 Already connected to another voice channel. Sorry!")
+                raise commands.CommandError("Already connected to voice channel.")
 
     @help.before_invoke
     @soundfonts.before_invoke
+    @prefix.before_invoke
     async def ensure_channel(self, ctx):
-        channel = discord.utils.get(ctx.message.guild.channels, name="midi-player")
-        if ctx.message.channel != channel:
-            raise commands.CommandError("{} typed in wrong channel.".format(ctx.message.author))
-        else:
-            if ctx.message.author.bot: raise commands.CommandError("Is a bot.")
-            if ctx.message.author.id == client.user.id: raise commands.CommandError("It's a-me, Mario!")
-
-@client.event
-async def on_ready():
-    game = discord.Game("MIDIs (v1.69-lol)")
-    await client.change_presence(activity=game)
-    for guild in client.guilds:
-        guilds_list[guild.id] = {'queue': []}
-    print("MIDI Player Ready")
-
-@client.event
-async def on_guild_join(guild):
-    print("MIDI Player joined the new lobby:", guild)
-    channel = discord.utils.get(guild.channels, name="midi-player")
-    if not channel:
-        await guild.create_text_channel('midi-player')
-    guilds_list[guild.id] = {'queue': []}
-
-@client.event
-async def on_guild_leave(guild):
-    print("MIDI Player left the lobby:", guild)
-    del guilds_list[guild.id]
-
-@client.event
-async def on_command_error(ctx, error):
-    if isinstance(error, commands.CommandOnCooldown):
-        return
-    elif isinstance(error, commands.CommandNotFound):
-        return
-    elif isinstance(error, commands.CommandError):
-        print("Command error:", error)
+        # channel = discord.utils.get(ctx.message.guild.channels, name="midi-player")
+        # if ctx.message.channel != channel:
+        #     raise commands.CommandError("{} typed in wrong channel.".format(ctx.message.author))
+        # else:
+        if ctx.message.author.bot: raise commands.CommandError("Is a bot.")
+        if ctx.message.author.id == client.user.id: raise commands.CommandError("It's a-me, Mario!")
 
 client.remove_command("help")
 client.add_cog(MIDI_player(client))

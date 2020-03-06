@@ -121,13 +121,36 @@ if [ $ffmpeg -eq 0 ]; then
 	fi
 else
 	echo "${txtcyn}=== ffmpeg is already installed ===${txtrst}"
-	fluidsynth --version
+	ffmpeg --version
+	let "success++"
+fi
+
+## MongoDB - for database stuff
+
+mongodb=$(dpkg-query -W -f='${status}' mongodb-org | grep -c 'ok installed')
+
+if [ $mongodb -eq 0 ]; then
+	echo "${txtcyn}=== Installing MongoDB... ===${txtrst}"
+	sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75D9DCB49F368818C72E52529D4
+	echo "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu $(lsb_release -cs)/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
+	sudo apt update
+	sudo apt install -y mongodb-org 2>&1 >/dev/null
+	mongod --version
+
+	control5=$(dpkg-query -W -f='${status}' mongodb-org | grep -c 'ok installed')
+
+	if [ $control5 -eq 1 ]; then
+		let "success++"
+	fi
+else
+	echo "${txtcyn}=== MongoDB is already installed ===${txtrst}"
+	mongod --version
 	let "success++"
 fi
 
 ## End result and final touches
 
-if [ $success -eq 4 ]; then
+if [ $success -eq 5 ]; then
 	echo "${txtgrn}=== Packages are successfully installed ===${txtrst}"
 	echo "${txtcyn}=== chmod +x start.sh ===${txtrst}"
 	chmod +x start.sh
@@ -136,15 +159,22 @@ if [ $success -eq 4 ]; then
 		read -p "Do you wish to launch the bot whenever the machine starts up? [Y/n] " yn
 		case $yn in
 			[Yy]* ) rc_local; break;;
+			[Nn]* ) break;;
+			* ) echo "Please answer yes or no.";;
+		esac
+	done
+
+	while true; do
+		read -p "Do you wish to enable MongoDB on startup? [Y/n] " yn
+		case $yn in
+			[Yy]* ) sudo systemctl enable mongod; break;;
 			[Nn]* ) exit;;
 			* ) echo "Please answer yes or no.";;
 		esac
 	done
 
-	exit 0
-
 	echo "${txtgrn}=== All done! Exiting the script... ===${txtrst}"
-elif [ $success -lt 4 ]; then
+elif [ $success -lt 5 ]; then
 	echo "${txtred}=== Some packages are not installed, please try again ===${txtrst}"
 	exit 1
 fi
