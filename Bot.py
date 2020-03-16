@@ -1,19 +1,31 @@
+################################
+# MIT License                  #
+# ---------------------------- #
+# Copyright (c) 2020 Bluntano  #
+################################
+
+# All neccessary module imports here
 import os
 import json
-import shutil
-import pymongo
+import shutil # folder creatinon, deletion
+import pymongo # for MongoDB
 
+# Load variables from .env file
 from dotenv import load_dotenv
 load_dotenv(verbose=True)
 
+# MIDIConverter.py
 import MIDIConverter as midic
 
+# Global cooldown time set
 cooldown_time = 3
-guilds_list = {}
+guilds_list = {} # player queues/dict for each Discord guild
 
+# Get MongoDB variables (host and port)
 MONGODB_HOST = os.getenv("MONGODB_HOST")
 MONGODB_PORT = os.getenv("MONGODB_PORT")
 
+# Database stuff here
 db_client = pymongo.MongoClient(MONGODB_HOST, int(MONGODB_PORT))
 dblist = db_client.list_database_names()
 if not "guild_database" in dblist:
@@ -23,49 +35,62 @@ else:
     print("=== guild_database exists ===")
     guild_col = db_client["guild_database"]["guilds"]
 
+# Asynchronous function for determing prefix for each Discord guild
 async def determine_prefix(client, message):
     guild = message.guild
     prefix = guild_col.find_one({ "guild_id": guild.id }, { "prefix": 1, "_id": 0 })
     prefix = prefix['prefix']
     return prefix
 
+# Discord stuff here
 TOKEN = os.getenv("DISCORD")
 import discord
 import asyncio
 from discord.ext import commands
-client = commands.Bot(command_prefix=determine_prefix)
+client = commands.Bot(command_prefix=determine_prefix) # determine each guild's bot prefix
 
+# On bot logon
 @client.event
 async def on_ready():
     game = discord.Game("MIDI Player")
     await client.change_presence(activity=game)
+
+    # counts up all the guilds the bot is in
     for guild in client.guilds:
         guilds_list[guild.id] = {'name': guild.name, 'queue': []}
         
+        # checks all the guilds in db's collection
         myquery = { "guild_id": guild.id }
         mydoc = guild_col.find_one(myquery)
-        
         if not mydoc:
             guild_col.insert_one({"guild_id": guild.id, "prefix": "midi."})
     # for x in guild_col.find():
     #     print(x)
     print("MIDI Player Ready")
 
+# On bot joining new guild
 @client.event
 async def on_guild_join(guild):
     print("MIDI Player joined the new lobby:", guild)
     # channel = discord.utils.get(guild.channels, name="midi-player")
     # if not channel:
     #     await guild.create_text_channel('midi-player')
+
+    # inserts new guild to the db with default prefix
+    # as well as creates new object for the guild in the queue dict
     guild_col.insert_one({"guild_id": guild.id, "prefix": "midi."})    
     guilds_list[guild.id] = {'name': guild.name, 'queue': []}
 
+# On bot being removed from the guild
 @client.event
 async def on_guild_remove(guild):
     print("MIDI Player was removed/left the lobby:", guild)
+
+    # deletes guild from the 
     del guilds_list[guild.id]
     guild_col.delete_one({"guild_id": guild.id})
 
+# Error handling
 @client.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
@@ -77,6 +102,8 @@ async def on_command_error(ctx, error):
     elif isinstance(error, commands.CommandError):
         print("Command error:", error)
 
+# This is for storing MIDI file info and the MIDI file itself on
+# guild's directory
 class add_to_json:
     def __init__(self, name, id):
         self.name = name
@@ -93,8 +120,11 @@ class add_to_json:
             json.dump(conv_dict, json_file)
         return
 
+# Asynchronous function for playing music
 async def play_music(ctx, skip_command=False):
 
+    # checks the queue whether there is songs to play from queue
+    # and removes them once they've played
     def check_queue(error):
         if len(guilds_list[ctx.guild.id]['queue']) > 0:
             player = guilds_list[ctx.guild.id]['queue'][0]
@@ -118,17 +148,21 @@ async def play_music(ctx, skip_command=False):
             guilds_list[ctx.guild.id]['queue'] = []
             raise commands.CommandError("{}'s queue is empty.".format(ctx.guild.id))
 
+    # if there's tracks in the queue to play
     if len(guilds_list[ctx.guild.id]['queue']) != 0:
         if ctx.voice_client is None:
             if ctx.author.voice:
                 await ctx.author.voice.channel.connect()
     
+    # when <prefix>play is executed in the text channel
     if skip_command is False:
         if ctx.voice_client:
             if ctx.voice_client.is_playing():
                 await ctx.send("▶️ Already playing!")
                 raise commands.CommandError("Bot on guild with the id of {} already playing.")
 
+    # follows the same logic as in check_queue function
+    # but is required for first time playing tracks
     if len(guilds_list[ctx.guild.id]['queue']) > 0:
         current = guilds_list[ctx.guild.id]['queue'][0]
         audio_source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('guilds/{}/{}.wav'.format(ctx.guild.id, current)))
@@ -151,6 +185,7 @@ async def play_music(ctx, skip_command=False):
         if skip_command is False:
             await ctx.send("⏹️ Queue is empty. You should add something first!")
 
+# MIDI Player (core of it)
 class MIDI_player(commands.Cog):
 
     def __init__(self, client):
@@ -159,6 +194,8 @@ class MIDI_player(commands.Cog):
     @commands.command()
     @commands.cooldown(1, cooldown_time, commands.BucketType.guild)
     async def convert(self, ctx, arg1=None, arg2=None):
+
+        # if there's no files attached to the command
         if ctx.message.attachments == []:
             await ctx.send("❌ No MIDI file in the attachment!")
             return
@@ -170,13 +207,16 @@ class MIDI_player(commands.Cog):
 
         message = await ctx.send("⏳ Checking the file...")
 
+        # checks whether the file is MIDI or not
         midic.detect_midi_file(link)
         if midic.detect_midi_file.is_midi == False:
             await message.edit(content="❌ Not a valid MIDI file!")
             raise commands.CommandError("No valid MIDI file.")
 
+        # available sound fonts to use
         soundfonts = ['megadrive', 'snes', 'n64']
 
+        # handling passed arguments in the command
         try:
             arg2 = int(arg1)
             arg1 = 'default'
@@ -191,19 +231,25 @@ class MIDI_player(commands.Cog):
         except TypeError:
             arg1 = 'default'
             arg2 = 22050
-
+        
+        # checks what is passed as first argument in the command
         if arg1 != None:
             try:
                 k = soundfonts.index(arg1)
                 arg1 = soundfonts[k]
             except ValueError:
                 arg1 = 'default'
-
+        
+        # sample rate check
+        # min - 8000Hz
+        # max - 44100Hz
         if arg2 > 44100:
             arg2 = 44100
         if arg2 < 8000:
             arg2 = 8000
 
+        # adding file name and guild id to temporary JSON file
+        # so the MIDI converter could process it through
         add_to_json(name, server_id).write_json_file()
 
         print('Converting with {} soundfont @ {} Hz...'.format(arg1, arg2))
@@ -212,7 +258,9 @@ class MIDI_player(commands.Cog):
         else:
             name = '{}hz_{}'.format(arg2, name)
 
-        await message.edit(content="♻️ Uploading...")
+        await message.edit(content="♻️ Converting...")
+
+        # converting process, "front-end"
         midic.convert_midi_to_audio(link, arg1, arg2, server_id, name)
         while True:
             is_uploaded = midic.convert_midi_to_audio.is_converted
@@ -228,6 +276,8 @@ class MIDI_player(commands.Cog):
     @commands.command()
     @commands.cooldown(1, cooldown_time, commands.BucketType.guild)
     async def play(self, ctx):
+
+        # executes play_music command
         await play_music(ctx)
 
     @commands.command()
@@ -235,8 +285,11 @@ class MIDI_player(commands.Cog):
     async def stop(self, ctx):
         guild = ctx.message.guild.id
 
+        # empties the queue
         guilds_list[guild]['queue'] = []
 
+        # stops bot playing, deletes guild's directory in guilds dir
+        # disconnects from the voice channel
         ctx.voice_client.stop()
         await ctx.send("⏹️ Stopped")
         try:
@@ -276,6 +329,8 @@ class MIDI_player(commands.Cog):
     @commands.command()
     @commands.cooldown(1, 2, commands.BucketType.guild)
     async def skip(self, ctx):
+
+        # skips the song, executes play_music function as being skipped
         ctx.voice_client.stop()
         await asyncio.sleep(0.5)
         await play_music(ctx, True)
@@ -283,6 +338,9 @@ class MIDI_player(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def prefix(self, ctx, prefix=None):
+
+        # for updating guild's bot prefix if wanted
+        # requires admin priviledge on the guild
         server_id = ctx.message.guild.id
         pfx = guild_col.find_one({ "guild_id": server_id }, { "prefix": 1, "_id": 0 })
         pfx = pfx['prefix']
@@ -361,6 +419,12 @@ class MIDI_player(commands.Cog):
         # if ctx.message.channel != channel:
         #     raise commands.CommandError("{} typed in wrong channel.".format(ctx.message.author))
         # else:
+
+        # ensures everything needed like:
+        # - if bot received from other bot
+        # - if the bot itself messaged
+        # - if bot is already connected to voice channel
+        # - if user executing commands is in the voice channel
         if ctx.message.author.bot: raise commands.CommandError("Is a bot.")
         if ctx.message.author.id == client.user.id: raise commands.CommandError("It's a-me, Mario!")
         if ctx.voice_client is None:
@@ -383,9 +447,12 @@ class MIDI_player(commands.Cog):
         # if ctx.message.channel != channel:
         #     raise commands.CommandError("{} typed in wrong channel.".format(ctx.message.author))
         # else:
+
+        # ensures that other bot hasn't typed out the command or
+        # if it was this bot who typed the command
         if ctx.message.author.bot: raise commands.CommandError("Is a bot.")
         if ctx.message.author.id == client.user.id: raise commands.CommandError("It's a-me, Mario!")
 
-client.remove_command("help")
-client.add_cog(MIDI_player(client))
-client.run(TOKEN)
+client.remove_command("help") # for custom help command
+client.add_cog(MIDI_player(client)) # add MIDI Player commands and its ensuring tools to the bot
+client.run(TOKEN) # run the bot

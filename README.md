@@ -40,10 +40,11 @@ Sample rate max - 44100 Hz; min - 8000 Hz.
 Before you do anything, make a new `.env` file with the content:
 ```
 DISCORD=<your app secret token>
-DROPBOX=<your app secret token [optional if you want audio to be uploaded to Dropbox]>
 MONGODB_HOST=<your MongoDB host, can be localhost>
 MONGODB_PORT=<your MongoDB port, can be 27017>
 ```
+
+I would highly recommend changing the MongoDB's hosting port from default (27017) for safety concerns.
 
 To get it up and running, you first have to launch `bash setup.sh` to install all required packages. After that you can simply launch `./start.sh`.
 
@@ -53,8 +54,6 @@ To get it up and running, you first have to launch `bash setup.sh` to install al
 - ffmpeg (for playing songs in voice channel)
 - Fluidsynth (for converting MIDI to WAV file)
 - MongoDB (for database storage)
-
-I would highly recommend changing the MongoDB's hosting port for safety concerns.
 
 To start MongoDB service immediately after setup, all you have to enter is `sudo systemctl start mongod`.
 
@@ -66,7 +65,8 @@ If you don't like to have MongoDB server on the same machine, you can disable it
 
 ## TODO
 
-- nothing on the list currently, bug fixes once I find them.
+1. Develop skip vote system
+2. develop covid-19 vaccine lol
 
 I'll update the todo list from time to time.
 
