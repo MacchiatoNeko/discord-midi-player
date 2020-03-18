@@ -66,7 +66,8 @@ If you don't like to have MongoDB server on the same machine, you can disable it
 ## TODO
 
 1. Develop skip vote system
-2. develop covid-19 vaccine lol
+2. Implement inactivity system (when inactive, leave the vc)
+3. #StayTheFuckHome
 
 I'll update the todo list from time to time.
 
