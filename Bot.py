@@ -40,7 +40,7 @@ async def determine_prefix(client, message):
     guild = message.guild
     prefix = guild_col.find_one({ "guild_id": guild.id }, { "prefix": 1, "_id": 0 })
     prefix = prefix['prefix']
-    return prefix
+    return prefix, 'midi.'
 
 # Discord stuff here
 TOKEN = os.getenv("DISCORD")
@@ -52,7 +52,7 @@ client = commands.Bot(command_prefix=determine_prefix) # determine each guild's 
 # On bot logon
 @client.event
 async def on_ready():
-    game = discord.Game("MIDI Player")
+    game = discord.Game("midi.help | MIDI Player")
     await client.change_presence(activity=game)
 
     # counts up all the guilds the bot is in
@@ -143,6 +143,7 @@ async def play_music(ctx, skip_command=False):
             client.loop.create_task(ctx.send(message))
         else:
             message = "⏹️ Queue is empty"
+            client.loop.create_task(ctx.voice_client.disconnect()) # disconnect after queue is empty
             client.loop.create_task(ctx.send(message))
             shutil.rmtree('guilds/{}/'.format(ctx.guild.id))
             guilds_list[ctx.guild.id]['queue'] = []
@@ -159,7 +160,7 @@ async def play_music(ctx, skip_command=False):
         if ctx.voice_client:
             if ctx.voice_client.is_playing():
                 await ctx.send("▶️ Already playing!")
-                raise commands.CommandError("Bot on guild with the id of {} already playing.")
+                raise commands.CommandError("Bot on guild with the id of {} already playing.".format(ctx.guild.id))
 
     # follows the same logic as in check_queue function
     # but is required for first time playing tracks
