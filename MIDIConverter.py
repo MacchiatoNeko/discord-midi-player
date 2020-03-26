@@ -6,10 +6,6 @@
 import os
 import requests # for downloading MIDI file from link
 from midi2audio import FluidSynth
-import json
-
-# Boolean for to allow/deny uploading converted WAV file to Dropbox
-allow_dropbox_upload = False
 
 # For detecting whether the file is MIDI or not
 # method used here: the end of the url passed in the function
