@@ -237,6 +237,11 @@ class MIDI_player(commands.Cog):
             arg2 = 44100
         if arg2 < 8000:
             arg2 = 8000
+
+        if arg1 != 'default':
+            name = f'{arg1}-{arg2}hz_{name}'
+        else:
+            name = f'{arg2}hz_{name}'
         
         # checks whether the file is MIDI or not
         midic = MIDIConverter(link, arg1, arg2, server_id, name)
@@ -251,11 +256,6 @@ class MIDI_player(commands.Cog):
         add_to_json(name, server_id).write_json_file()
 
         print(f'Converting with {arg1} soundfont @ {arg2} Hz...')
-        if arg1 != 'default':
-            name = f'{arg1}-{arg2}hz_{name}'
-        else:
-            name = f'{arg2}hz_{name}'
-
         await message.edit(content="♻️ Converting...")
 
         # converting process, "front-end"
