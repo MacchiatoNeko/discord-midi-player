@@ -7,14 +7,14 @@
 
 ### Sound fonts
 
-In this repository, there are 4 sound fonts. You can additionally add yourself more to the `soundfonts/` folder, but you have to add these to `MIDIConverter.py` and `Bot.py` by changing the code a bit.
+In this repository, there are 4 sound fonts. You can additionally add yourself more to the `soundfonts/` folder. `Common.py` detects automatically sound font files for you on the bot startup, default there is `generaluser_gs.sf2`.
 
-| Sound fonts         | Name            | Name in `!convert` command |
-| :------------------ | :-------------- | :------------------------- |
-| generaluser_gs.sf2  | Default         | `[Whatever you type there]`|
-| megadrive.sf2       | Sega Genesis    | `megadrive`                |
-| n64_2-0.sf2         | Nintendo 64     | `n64`                      |
-| SNES.sf2            | Super Nintendo  | `snes`                     |
+| Sound fonts         | Name            | Name in `midi.convert` command |
+| :------------------ | :-------------- | :----------------------------- |
+| generaluser_gs.sf2  | Default         | `[Whatever you type there]`    |
+| megadrive.sf2       | Sega Genesis    | `megadrive`                    |
+| n64.sf2             | Nintendo 64     | `n64`                          |
+| snes.sf2            | Super Nintendo  | `snes`                         |
 
 ### Commands (that you can use for now)
 
@@ -53,7 +53,7 @@ To get it up and running, you first have to launch `bash setup.sh` to install al
 - Python with pip (minimum Python version 3.5.3 due to discord.py module requirement)
 - ffmpeg (for playing songs in voice channel)
 - Fluidsynth (for converting MIDI to WAV file)
-- MongoDB (for database storage)
+- MongoDB (for database storage - for now, prefix system)
 
 To start MongoDB service immediately after setup, all you have to enter is `sudo systemctl start mongod`.
 
