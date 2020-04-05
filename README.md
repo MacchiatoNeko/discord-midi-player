@@ -1,5 +1,5 @@
 # discord-midi-player
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/bluntano/discord-midi-player.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/bluntano/discord-midi-player/alerts/) [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/bluntano/discord-midi-player.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/bluntano/discord-midi-player/context:python)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/bluntano/discord-midi-player.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/bluntano/discord-midi-player/alerts/) [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/bluntano/discord-midi-player.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/bluntano/discord-midi-player/context:python) [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/ellarto)
 
  🎵 Simple Discord MIDI player, converts MIDI to WAV with sound font. 🎵
 
