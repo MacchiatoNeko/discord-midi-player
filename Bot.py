@@ -16,6 +16,22 @@ from Common import *
 
 guilds_list = {} # player queues/dict for each Discord guild
 
+# Web server stuff here
+from flask import Flask, redirect
+from threading import Thread
+app = Flask(__name__)
+
+@app.route("/")
+def hello():
+    return redirect(f"https://discordapp.com/oauth2/authorize?client_id={client.user.id}&permissions=3147776&scope=bot")
+
+def run_webserver():
+    app.run(host='0.0.0.0', port=80)
+
+def keep_alive():
+    t = Thread(target=run_webserver)
+    t.start()
+
 # Database stuff here
 db_client = pymongo.MongoClient(MONGODB_HOST, int(MONGODB_PORT))
 dblist = db_client.list_database_names()
@@ -69,6 +85,7 @@ async def on_ready():
             guild_col.insert_one({"guild_id": guild.id, "prefix": "midi."})
     print("MIDI Player Ready")
     client.loop.create_task(status_task())
+    keep_alive()
 
 # On bot joining new guild
 @client.event
