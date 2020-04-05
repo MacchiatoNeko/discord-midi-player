@@ -58,12 +58,12 @@ client = commands.Bot(command_prefix=determine_prefix) # determine each guild's 
 # Status changer task
 # Changes the status every 30 seconds
 async def status_task():
-    statuses = [
+    while True:
+        statuses = [
         "MIDI Player",
-        f"Serving {str(len(client.guilds))} servers",
+        f"Serving {guild_col.estimated_document_count()} servers",
         "Play your MIDIs today!",
         ]
-    while True:
         for i in statuses:
             status = discord.Game(f"midi.help | {i}")
             await client.change_presence(activity=status)
@@ -82,7 +82,7 @@ async def on_ready():
         myquery = { "guild_id": guild.id }
         mydoc = guild_col.find_one(myquery)
         if not mydoc:
-            guild_col.insert_one({"guild_id": guild.id, "prefix": "midi."})
+            guild_col.insert_one({"guild_id": guild.id, "guild_name": guild.name, "prefix": "midi."})
     print("MIDI Player Ready")
     client.loop.create_task(status_task())
     keep_alive()
@@ -94,7 +94,7 @@ async def on_guild_join(guild):
 
     # inserts new guild to the db with default prefix
     # as well as creates new object for the guild in the queue dict
-    guild_col.insert_one({"guild_id": guild.id, "prefix": "midi."})    
+    guild_col.insert_one({"guild_id": guild.id, "guild_name": guild.name, "prefix": "midi."})    
     guilds_list[guild.id] = {'name': guild.name, 'queue': []}
 
 # On bot being removed from the guild
@@ -278,9 +278,6 @@ class MIDI_player(commands.Cog):
     async def stop(self, ctx):
         guild = ctx.message.guild.id
 
-        # empties the queue
-        guilds_list[guild]['queue'] = []
-
         # stops bot playing, deletes guild's directory in guilds dir
         # disconnects from the voice channel
         try:
@@ -290,9 +287,14 @@ class MIDI_player(commands.Cog):
                 shutil.rmtree(f'guilds/{guild}/')
             except FileNotFoundError:
                 pass
+
+            # empties the queue
+            guilds_list[guild]['queue'] = []
+
             await ctx.voice_client.disconnect()
         except AttributeError:
-            await ctx.send("⏹️ There is nothing to stop")
+            #await ctx.send("⏹️ There is nothing to stop")
+            pass
 
     @commands.command()
     @commands.cooldown(1, cooldown_time, commands.BucketType.guild)
