@@ -48,7 +48,7 @@ class MIDIConverter:
             # checks which sound font got passed
             sf_toconvert = "generaluser_gs" # by default
 
-            if self.sf == tuple(soundfonts):
+            if self.sf in soundfonts:
                 sf_toconvert = self.sf
 
             fs = FluidSynth(f'soundfonts/{sf_toconvert}.sf2', sample_rate=self.sample_rate)
