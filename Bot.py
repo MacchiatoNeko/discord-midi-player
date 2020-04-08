@@ -11,26 +11,11 @@ import pymongo # for MongoDB
 # MIDIConverter.py
 from MIDIConverter import MIDIConverter
 
-# Common functions and exceptions
+# Common functions, web server and exceptions
 from Common import *
+import WebServer
 
 guilds_list = {} # player queues/dict for each Discord guild
-
-# Web server stuff here
-from flask import Flask, redirect
-from threading import Thread
-app = Flask(__name__)
-
-@app.route("/")
-def hello():
-    return redirect(f"https://discordapp.com/oauth2/authorize?client_id={client.user.id}&permissions=3147776&scope=bot")
-
-def run_webserver():
-    app.run(host='0.0.0.0', port=80)
-
-def keep_alive():
-    t = Thread(target=run_webserver)
-    t.start()
 
 # Database stuff here
 db_client = pymongo.MongoClient(MONGODB_HOST, int(MONGODB_PORT))
@@ -59,33 +44,36 @@ client = commands.Bot(command_prefix=determine_prefix) # determine each guild's 
 # Changes the status every 30 seconds
 async def status_task():
     while True:
+        guilds_num = str(len(client.guilds))
         statuses = [
         "MIDI Player",
-        f"Serving {guild_col.estimated_document_count()} servers",
+        f"Serving {guilds_num} servers",
         "Play your MIDIs today!",
         ]
         for i in statuses:
             status = discord.Game(f"midi.help | {i}")
             await client.change_presence(activity=status)
-            await asyncio.sleep(15)
+            await asyncio.sleep(30)
 
 # On bot logon
 @client.event
 async def on_ready():
-    # game = discord.Game("midi.help | MIDI Player")
-    # await client.change_presence(activity=game)
+    
+    # for invite link
+    WebServer.client_userid = client.user.id
+    
     # counts up all the guilds the bot is in
     for guild in client.guilds:
-        guilds_list[guild.id] = {'name': guild.name, 'queue': []}
+        guilds_list[guild.id] = {'queue': []}
         
         # checks all the guilds in db's collection
         myquery = { "guild_id": guild.id }
         mydoc = guild_col.find_one(myquery)
         if not mydoc:
-            guild_col.insert_one({"guild_id": guild.id, "guild_name": guild.name, "prefix": "midi."})
+            guild_col.insert_one({"guild_id": guild.id, "prefix": "midi."})
     print("MIDI Player Ready")
     client.loop.create_task(status_task())
-    keep_alive()
+    WebServer.keep_alive()
 
 # On bot joining new guild
 @client.event
@@ -94,8 +82,8 @@ async def on_guild_join(guild):
 
     # inserts new guild to the db with default prefix
     # as well as creates new object for the guild in the queue dict
-    guild_col.insert_one({"guild_id": guild.id, "guild_name": guild.name, "prefix": "midi."})    
-    guilds_list[guild.id] = {'name': guild.name, 'queue': []}
+    guild_col.insert_one({"guild_id": guild.id, "prefix": "midi."})    
+    guilds_list[guild.id] = {'queue': []}
 
 # On bot being removed from the guild
 @client.event
