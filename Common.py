@@ -1,4 +1,4 @@
-__all__ = ['MONGODB_HOST', 'MONGODB_PORT', 'TOKEN', 'NotMIDIFileError', 'add_to_json', 'ConversionError']
+__all__ = ['MONGODB_HOST', 'MONGODB_PORT', 'TOKEN', 'NotMIDIFileError', 'add_to_json', 'ConversionError', 'cooldown_time', 'soundfonts']
 
 import json
 import os
