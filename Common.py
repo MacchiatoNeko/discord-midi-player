@@ -1,3 +1,5 @@
+__all__ = ['MONGODB_HOST', 'MONGODB_PORT', 'TOKEN', 'NotMIDIFileError', 'add_to_json', 'ConversionError']
+
 import json
 import os
 
