@@ -48,12 +48,13 @@ async def status_task():
         statuses = [
         "MIDI Player",
         f"Serving {guilds_num} servers",
+        "Thank you for using MIDI Player :3",
         "Play your MIDIs today!",
         ]
         for i in statuses:
             status = discord.Game(f"midi.help | {i}")
             await client.change_presence(activity=status)
-            await asyncio.sleep(30)
+            await asyncio.sleep(60)
 
 # On bot logon
 @client.event
@@ -114,12 +115,12 @@ async def play_music(ctx, skip_command=False):
     def check_queue(error):
         if len(guilds_list[ctx.guild.id]['queue']) > 0:
             player = guilds_list[ctx.guild.id]['queue'][0]
-            audio_source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('guilds/{}/{}.wav'.format(ctx.guild.id, player)))
+            audio_source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(f'guilds/{ctx.guild.id}/{player}.wav'))
             ctx.voice_client.play(audio_source, after=check_queue)
-            message = "▶️ Now Playing: `{}`".format(player)
+            message = f"▶️ Now Playing: `{player}`"
             try:
                 up_next = guilds_list[ctx.guild.id]['queue'][1]
-                message += "\n\n⏭️ Up next: `{}`".format(up_next)
+                message += f"\n\n⏭️ Up next: `{up_next}`"
             except IndexError:
                 pass
             try:
@@ -131,9 +132,9 @@ async def play_music(ctx, skip_command=False):
             message = "⏹️ Queue is empty"
             client.loop.create_task(ctx.voice_client.disconnect()) # disconnect after queue is empty
             client.loop.create_task(ctx.send(message))
-            shutil.rmtree('guilds/{}/'.format(ctx.guild.id))
+            shutil.rmtree(f'guilds/{ctx.guild.id}/')
             guilds_list[ctx.guild.id]['queue'] = []
-            raise commands.CommandError("{}'s queue is empty.".format(ctx.guild.id))
+            raise commands.CommandError(f"{ctx.guild.id}'s queue is empty.")
 
     # if there's tracks in the queue to play
     if len(guilds_list[ctx.guild.id]['queue']) != 0:
@@ -146,19 +147,19 @@ async def play_music(ctx, skip_command=False):
         if ctx.voice_client:
             if ctx.voice_client.is_playing():
                 await ctx.send("▶️ Already playing!")
-                raise commands.CommandError("Bot on guild with the id of {} already playing.".format(ctx.guild.id))
+                raise commands.CommandError(f"Bot on guild with the id of {ctx.guild.id} already playing.")
 
     # follows the same logic as in check_queue function
     # but is required for first time playing tracks
     if len(guilds_list[ctx.guild.id]['queue']) > 0:
         current = guilds_list[ctx.guild.id]['queue'][0]
-        audio_source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('guilds/{}/{}.wav'.format(ctx.guild.id, current)))
+        audio_source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(f'guilds/{ctx.guild.id}/{current}.wav'))
         ctx.voice_client.play(audio_source, after=check_queue)
 
-        message = "▶️ Now Playing: `{}`".format(current)
+        message = f"▶️ Now Playing: `{current}`"
         try:
             up_next = guilds_list[ctx.guild.id]['queue'][1]
-            message += "\n\n⏭️ Up next: `{}`".format(up_next)
+            message += f"\n\n⏭️ Up next: `{up_next}`"
         except IndexError:
             pass
 
