@@ -5,6 +5,7 @@
 ################################
 import os
 import requests # for downloading MIDI file from link
+import audio_metadata # for checking converted WAV metadata
 from midi2audio import FluidSynth
 from Common import ConversionError, NotMIDIFileError, soundfonts
 
@@ -54,14 +55,24 @@ class MIDIConverter:
             fs = FluidSynth(f'soundfonts/{sf_toconvert}.sf2', sample_rate=self.sample_rate)
             
             # file duplicate prevention
-            if not os.path.exists(f'{server_path}/{self.name}.wav'):
-                fs.midi_to_audio(midi_path, f'{server_path}/{self.name}.wav')
+            wav_file = f'{server_path}/{self.name}.wav'
+            if not os.path.exists(wav_file):
+                fs.midi_to_audio(midi_path, wav_file)
+
+                # metadata check
+                metadata = audio_metadata.load(wav_file)
+                duration = metadata.streaminfo['duration']
+                if duration > 600:
+                    os.remove(wav_file)
+                    raise ConversionError("MIDI file longer than 10 minutes.")
+
             else:
-                print(f"/{self.id}/{self.name}.wav already exists!")
+                print(f"{wav_file} already exists!")
 
             # removes MIDI file and metadata JSON file
             os.remove(midi_path)
             os.remove(info_path)
+            return True
             
         except Exception as e:
             raise ConversionError(e)

@@ -4,3 +4,4 @@ midi2audio
 requests
 pymongo
 flask
+audio_metadata
