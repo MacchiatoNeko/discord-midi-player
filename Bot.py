@@ -7,15 +7,31 @@
 # All neccessary module imports here
 import shutil # folder creatinon, deletion
 import pymongo # for MongoDB
+import os
+from dotenv import load_dotenv # for .env file
 
 # MIDIConverter.py
-from MIDIConverter import MIDIConverter
+from MIDIConverter import MIDIConverter, ConversionError, soundfonts
 
-# Common functions, web server and exceptions
-from Common import *
+# WebServer.py
 import WebServer
+# Discord stuff here
+import discord
+import asyncio
+from discord.ext import commands
+
+load_dotenv(verbose=True)
+print(soundfonts)
+
+# Get MongoDB variables (host and port)
+MONGODB_HOST = os.getenv("MONGODB_HOST")
+MONGODB_PORT = os.getenv("MONGODB_PORT")
+
+# Get Discord app token
+TOKEN = os.getenv("DISCORD")
 
 guilds_list = {} # player queues/dict for each Discord guild
+cooldown_time = 3
 
 # Database stuff here
 db_client = pymongo.MongoClient(MONGODB_HOST, int(MONGODB_PORT))
@@ -34,10 +50,6 @@ async def determine_prefix(client, message):
     prefix = prefix['prefix']
     return prefix, 'midi.'
 
-# Discord stuff here
-import discord
-import asyncio
-from discord.ext import commands
 client = commands.Bot(command_prefix=determine_prefix) # determine each guild's bot prefix
 
 # Status changer task
@@ -105,7 +117,8 @@ async def on_command_error(ctx, error):
     elif isinstance(error, commands.MissingPermissions):
         await ctx.send("🚫 You're missing permissions for that command!")
     elif isinstance(error, commands.CommandError):
-        print("Command error:", error)
+        print("Uh-oh :( ", error)
+    raise error
 
 # Asynchronous function for playing music
 async def play_music(ctx, skip_command=False):
@@ -227,33 +240,30 @@ class MIDI_player(commands.Cog):
         if arg2 < 8000:
             arg2 = 8000
 
+        MIDIC = MIDIConverter(server_id, link)
+
+        # checks whether the file is MIDI or not
+        if not MIDIC.is_midi_file():
+            await message.edit(content="❌ Not a valid MIDI file!")
+            raise commands.CommandError("No valid MIDI file.")
+
         if arg1 != 'default':
             name = f'{arg1}-{arg2}hz_{name}'
         else:
             name = f'{arg2}hz_{name}'
-        
-        # checks whether the file is MIDI or not
-        midic = MIDIConverter(link, arg1, arg2, server_id, name)
-        try:
-            midic.is_midi_file()
-        except NotMIDIFileError:
-            await message.edit(content="❌ Not a valid MIDI file!")
-            raise commands.CommandError("No valid MIDI file.")
-
-        # adding file name and guild id to temporary JSON file
-        # so the MIDI converter could process it through
-        add_to_json(name, server_id).write_json_file()
 
         print(f'Converting with {arg1} soundfont @ {arg2} Hz...')
         await message.edit(content="♻️ Converting...")
 
         # converting process, "front-end"
         try:
-            midic.convert_midi_to_audio()
+            result = MIDIC.convert_midi_to_audio(name, arg2, arg1)
             await message.edit(content="✅ MIDI file converted!")
             guilds_list[server_id]['queue'].append(name)
-        except ConversionError as e:
-            await message.edit(content=f"❗ Converting failed:\n||`{e}`||")
+            print(result)
+        except ConversionError as err:
+            await message.edit(content=f"❗ Converting failed:\n||`{err}`||")
+            #raise commands.CommandError(f"Couldn't convert on guild {server_id}")
 
     @commands.command()
     @commands.cooldown(1, cooldown_time, commands.BucketType.guild)

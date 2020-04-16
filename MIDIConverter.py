@@ -4,36 +4,75 @@
 # Copyright (c) 2020 Bluntano  #
 ################################
 import os
+import json
 import requests # for downloading MIDI file from link
 import audio_metadata # for checking converted WAV metadata
 from midi2audio import FluidSynth
-from Common import ConversionError, NotMIDIFileError, soundfonts
+
+soundfonts = []
+DEBUG = True
 
 class MIDIConverter:
 
-    def __init__(self, url, sf, sample_rate, id, name):
-        self.url = url
-        self.sf = sf
-        self.sample_rate = sample_rate
+    for dirpath, dirnames, filenames in os.walk('soundfonts/'):
+        for i in filenames:
+            i = os.path.splitext(i)
+            if i[1] == ".sf2":
+                if i[0] != "generaluser_gs":
+                    soundfonts.append(i[0])
+        break
+    
+    def __init__(self, id, url):
+        """MIDI Converter module
+        Parameters
+        ==========
+        id : int
+            Discord guild's id (in this context).
+        url : string
+            URL to check validation of and/or downloading MIDI file.
+        """
         self.id = id
-        self.name = name
+        self.url = url
+        self.sample_rate = 22050 # default sample rate
+        self.sf = "generaluser_gs" # default sound font
 
     # For detecting whether the file is MIDI or not
     # method used here: the end of the url passed in the function
     def is_midi_file(self):
-        mid = ['MID', 'mid', 'Mid', 'MIDI', 'midi', 'Midi']
-        if self.url.endswith(tuple(mid)):
+        """Checks whether the file from URL is MIDI or not"""
+        mid = ['mid', 'midi']
+        file_ext = self.url.rsplit('.', 1)[1]
+        if file_ext in mid:
             return True
         else:
-            raise NotMIDIFileError(f"{self.url} not a valid MIDI file")
+            return False
 
     # MIDI to WAV Converter
-    def convert_midi_to_audio(self):
+    def convert_midi_to_audio(self, name, sample_rate=22050, sf='generaluser_gs'):
+        """Downloads MIDI from the URL and converts it to WAV file.
 
-        server_path = f"guilds/{self.id}"
+        Parameters
+        ==========
+        name : string
+            MIDI file name
+        
+        sample_rate : int
+            Sample rate to convert at (default is 22050)
+        
+        sf : string
+            Sound font to convert with (default is 'generaluser_gs')
+        """
 
-        midi_path = f'{server_path}/midi_to_convert.mid'
-        info_path = f'{server_path}/info.json'
+        self.name = name
+        self.midi_path = f'guilds/{self.id}/{self.name}.mid'
+        self.wav_file = f'guilds/{self.id}/{self.name}.wav'
+        self.sample_rate = sample_rate
+        self.duration = 0
+        self.success = False
+        self.error = ""
+
+        if not os.path.exists(f'guilds/{self.id}'):
+            os.makedirs(f'guilds/{self.id}')
 
         # downloading MIDI from the link
         headers = {
@@ -41,38 +80,66 @@ class MIDIConverter:
         }
         try:
             r = requests.get(url=self.url, headers=headers, stream=True)
-            with open(midi_path, 'wb') as f:
+            with open(self.midi_path, 'wb') as f:
                 for chunk in r.iter_content(chunk_size=1024):
                     if chunk:
                         f.write(chunk)
 
-            # checks which sound font got passed
-            sf_toconvert = "generaluser_gs" # by default
+            if sf in soundfonts:
+                self.sf = sf
 
-            if self.sf in soundfonts:
-                sf_toconvert = self.sf
-
-            fs = FluidSynth(f'soundfonts/{sf_toconvert}.sf2', sample_rate=self.sample_rate)
+            fs = FluidSynth(f'soundfonts/{self.sf}.sf2', sample_rate=self.sample_rate)
             
             # file duplicate prevention
-            wav_file = f'{server_path}/{self.name}.wav'
-            if not os.path.exists(wav_file):
-                fs.midi_to_audio(midi_path, wav_file)
+            if not os.path.exists(self.wav_file):
+                fs.midi_to_audio(self.midi_path, self.wav_file)
 
                 # metadata check
-                metadata = audio_metadata.load(wav_file)
-                duration = metadata.streaminfo['duration']
-                if duration > 600:
-                    os.remove(wav_file)
+                metadata = audio_metadata.load(self.wav_file)
+                self.duration = metadata.streaminfo['duration']
+                if self.duration > 600:
+                    os.remove(self.wav_file)
                     raise ConversionError("MIDI file longer than 10 minutes.")
-
             else:
-                print(f"{wav_file} already exists!")
+                print(f"{self.wav_file} already exists!")
 
-            # removes MIDI file and metadata JSON file
-            os.remove(midi_path)
-            os.remove(info_path)
-            return True
+            # removes MIDI file
+            os.remove(self.midi_path)
+            self.success = True
+            self.debug()
+            return self.wav_file
             
         except Exception as e:
-            raise ConversionError(e)
+            self.error = str(e)
+            self.debug()
+            raise ConversionError(self.error)
+    
+    def debug(self):
+        if DEBUG:
+            info = {
+                self.id: {
+                    'midi_path': self.midi_path,
+                    'url': self.url,
+                    'sf': self.sf,
+                    'file_name': self.name,
+                    'wav_file:': {
+                        'path': self.wav_file,
+                        'duration': self.duration
+                    },
+                    'convert_success': [
+                        self.success, 'no errors' if not self.error else self.error
+                    ]
+                }
+            }
+            if not os.path.exists('debug.json'):
+                with open('debug.json', 'w', encoding='utf-8') as outfile:
+                    outfile.write(json.dumps({'debug': []}, indent=4, sort_keys=True))
+            with open('debug.json', 'r') as infile:
+                data = json.load(infile)
+                data['debug'].append(info)
+                with open('debug.json', 'w') as outfile:
+                    json.dump(data, outfile, indent=4, sort_keys=True)
+
+class ConversionError(Exception):
+    """Raised when there is an error with converting MIDI to WAV"""
+    pass
