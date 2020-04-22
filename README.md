@@ -7,12 +7,11 @@
 
 ### Sound fonts
 
-In this repository, there are 4 sound fonts. You can additionally add yourself more to the `soundfonts/` folder. `MIDIConverter.py` detects automatically sound font files for you on the bot startup, default there is `generaluser_gs.sf2`.
+In this repository, there are 3 sound fonts. You can additionally add yourself more to the `soundfonts/` folder. `MIDIConverter.py` detects automatically sound font files for you on the bot startup, default there is `generaluser_gs.sf2`.
 
 | Sound fonts         | Name            | Name in `midi.convert` command |
 | :------------------ | :-------------- | :----------------------------- |
 | generaluser_gs.sf2  | Default         | `[Whatever you type there]`    |
-| megadrive.sf2       | Sega Genesis    | `megadrive`                    |
 | n64.sf2             | Nintendo 64     | `n64`                          |
 | snes.sf2            | Super Nintendo  | `snes`                         |
 
