@@ -123,7 +123,7 @@ class MIDIConverter:
         if DEBUG:
             info = {
                 self.id: {
-                    'date-time': datetime.now(tz),
+                    'date-time': str(datetime.now(tz)),
                     'midi_path': self.midi_path,
                     'url': self.url,
                     'sf': self.sf,
