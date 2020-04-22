@@ -9,6 +9,11 @@ import requests # for downloading MIDI file from link
 import audio_metadata # for checking converted WAV metadata
 from midi2audio import FluidSynth
 
+# for debugging info
+from pytz import timezone
+from datetime import datetime
+tz = timezone('EET')
+
 soundfonts = []
 DEBUG = True
 
@@ -118,6 +123,7 @@ class MIDIConverter:
         if DEBUG:
             info = {
                 self.id: {
+                    'date-time': datetime.now(tz),
                     'midi_path': self.midi_path,
                     'url': self.url,
                     'sf': self.sf,
