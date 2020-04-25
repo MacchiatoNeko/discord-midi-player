@@ -1,3 +1,4 @@
+#!/bin/bash
 currentVer=$(python3 --version)
 requiredVer="3.5.3"
 
