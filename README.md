@@ -42,6 +42,7 @@ Before you do anything, make a new `.env` file with the content:
 DISCORD=<your app secret token>
 MONGODB_HOST=<your MongoDB host, can be localhost>
 MONGODB_PORT=<your MongoDB port, can be 27017>
+FLASK_HOST=localhost
 ```
 
 I would highly recommend changing the MongoDB's hosting port from default (27017) for safety concerns.
