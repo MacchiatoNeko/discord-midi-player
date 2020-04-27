@@ -18,7 +18,7 @@ fi
 
 # For making /etc/rc.local file
 
-function rc_local {
+rc_local () {
 	echo "${txtcyn}=== Making rc.local file... ===${txtrst}" # for starting up whenever machine boots up
 	echo "#!/bin/sh -e" > /etc/rc.local
 	echo "# rc.local" >> /etc/rc.local
@@ -56,13 +56,14 @@ if [ $python -eq 0 ]; then
 	
 	control1=$(dpkg-query -W -f='${status}' python3 | grep -c 'ok installed')
 	
-	if [ $control1 -eq 1 ]; then
-		let "success++"
+	if  [ $control1 -eq 1 ]; then
+		((success++));
 	fi
+
 else
 	echo "${txtcyn}=== Python 3 is already installed ===${txtrst}"
 	python3 --version
-	let "success++"
+	((success++));
 fi
 
 ## pip - for installing / updating modules
@@ -77,12 +78,12 @@ if [ $pip -eq 0 ]; then
 	control2=$(dpkg-query -W -f='${status}' python3-pip | grep -c 'ok installed')
 	
 	if [ $control2 -eq 1 ]; then
-		let "success++"
+		((success++));
 	fi
 else
 	echo "${txtcyn}=== pip is already installed ===${txtrst}"
 	pip3 --version
-	let "success++"
+	((success++));
 fi
 
 ## FluidSynth - for converting MIDI files into WAV type
@@ -97,12 +98,12 @@ if [ $fluidsynth -eq 0 ]; then
 	control3=$(dpkg-query -W -f='${status}' fluidsynth | grep -c 'ok installed')
 
 	if [ $control3 -eq 1 ]; then
-		let "success++"
+		((success++));
 	fi
 else
 	echo "${txtcyn}=== FluidSynth is already installed ===${txtrst}"
 	fluidsynth --version
-	let "success++"
+	((success++));
 fi
 
 ## ffmpeg - codec for to play in voice channel
@@ -117,12 +118,12 @@ if [ $ffmpeg -eq 0 ]; then
 	control4=$(dpkg-query -W -f='${status}' ffmpeg | grep -c 'ok installed')
 
 	if [ $control4 -eq 1 ]; then
-		let "success++"
+		((success++));
 	fi
 else
 	echo "${txtcyn}=== ffmpeg is already installed ===${txtrst}"
 	ffmpeg --version
-	let "success++"
+	((success++));
 fi
 
 ## MongoDB - for database stuff
@@ -140,12 +141,12 @@ if [ $mongodb -eq 0 ]; then
 	control5=$(dpkg-query -W -f='${status}' mongodb-org | grep -c 'ok installed')
 
 	if [ $control5 -eq 1 ]; then
-		let "success++"
+		((success++));
 	fi
 else
 	echo "${txtcyn}=== MongoDB is already installed ===${txtrst}"
 	mongod --version
-	let "success++"
+	((success++));
 fi
 
 ## End result and final touches
@@ -156,7 +157,7 @@ if [ $success -eq 5 ]; then
 	chmod +x start.sh
 	
 	while true; do
-		read -p "Do you wish to launch the bot whenever the machine starts up? [Y/n] " yn
+		read -r -p "Do you wish to launch the bot whenever the machine starts up? [Y/n] " yn
 		case $yn in
 			[Yy]* ) rc_local; break;;
 			[Nn]* ) break;;
@@ -165,7 +166,7 @@ if [ $success -eq 5 ]; then
 	done
 
 	while true; do
-		read -p "Do you wish to enable MongoDB on startup? [Y/n] " yn
+		read -r -p "Do you wish to enable MongoDB on startup? [Y/n] " yn
 		case $yn in
 			[Yy]* ) sudo systemctl enable mongod; break;;
 			[Nn]* ) exit;;
