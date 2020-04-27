@@ -27,16 +27,16 @@ class MIDIConverter:
                     soundfonts.append(i[0])
         break
     
-    def __init__(self, id, url):
+    def __init__(self, discord_id, url):
         """MIDI Converter module
         Parameters
         ==========
-        id : int
+        discord_id : int
             Discord guild's id (in this context).
         url : string
             URL to check validation of and/or downloading MIDI file.
         """
-        self.id = id
+        self.id = discord_id
         self.url = url
         self.sample_rate = 22050 # default sample rate
         self.sf = "generaluser_gs" # default sound font
@@ -47,10 +47,7 @@ class MIDIConverter:
         """Checks whether the file from URL is MIDI or not"""
         mid = ['mid', 'midi']
         file_ext = self.url.rsplit('.', 1)[1]
-        if file_ext in mid:
-            return True
-        else:
-            return False
+        return bool(file_ext in mid)
 
     # MIDI to WAV Converter
     def convert_midi_to_audio(self, name, sample_rate=22050, sf='generaluser_gs'):
@@ -148,4 +145,3 @@ class MIDIConverter:
 
 class ConversionError(Exception):
     """Raised when there is an error with converting MIDI to WAV"""
-    pass
