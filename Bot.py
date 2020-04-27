@@ -112,11 +112,11 @@ async def on_guild_remove(guild):
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
         return
-    elif isinstance(error, commands.CommandNotFound):
+    if isinstance(error, commands.CommandNotFound):
         return
-    elif isinstance(error, commands.MissingPermissions):
+    if isinstance(error, commands.MissingPermissions):
         await ctx.send("🚫 You're missing permissions for that command!")
-    elif isinstance(error, commands.CommandError):
+    if isinstance(error, commands.CommandError):
         print("Uh-oh :( ", error)
     raise error
 
@@ -225,7 +225,7 @@ class MIDI_player(commands.Cog):
             arg2 = 22050
         
         # checks what is passed as first argument in the command
-        if arg1 != None:
+        if arg1 is not None:
             try:
                 k = soundfonts.index(arg1)
                 arg1 = soundfonts[k]
@@ -303,11 +303,11 @@ class MIDI_player(commands.Cog):
             song_playing = ctx.voice_client.is_playing()
             paused = ctx.voice_client.is_paused()
 
-            if paused != True:
+            if not paused:
                 ctx.voice_client.pause()
                 await ctx.send("⏸️ Paused")
             else:
-                if song_playing == True:
+                if song_playing:
                     await ctx.send("▶️ Playing")
                 else:
                     await ctx.send("⏯️ Already paused")
@@ -320,7 +320,7 @@ class MIDI_player(commands.Cog):
 
         try:
             paused = ctx.voice_client.is_paused()
-            if paused == True:
+            if paused:
                 ctx.voice_client.resume()
                 await ctx.send("▶️ Resuming")
             else:
@@ -423,8 +423,10 @@ class MIDI_player(commands.Cog):
         # - if the bot itself messaged
         # - if bot is already connected to voice channel
         # - if user executing commands is in the voice channel
-        if ctx.message.author.bot: raise commands.CommandError("Is a bot.")
-        if ctx.message.author.id == client.user.id: raise commands.CommandError("It's a-me, Mario!")
+        if ctx.message.author.bot:
+            raise commands.CommandError("Is a bot.")
+        if ctx.message.author.id == client.user.id:
+            raise commands.CommandError("It's a-me, Mario!")
         if ctx.voice_client is None:
             if not ctx.author.voice:
                 await ctx.send("🚫 You are not connected to a voice channel!")
@@ -444,8 +446,10 @@ class MIDI_player(commands.Cog):
 
         # ensures that other bot hasn't typed out the command or
         # if it was this bot who typed the command
-        if ctx.message.author.bot: raise commands.CommandError("Is a bot.")
-        if ctx.message.author.id == client.user.id: raise commands.CommandError("It's a-me, Mario!")
+        if ctx.message.author.bot:
+            raise commands.CommandError("Is a bot.")
+        if ctx.message.author.id == client.user.id:
+            raise commands.CommandError("It's a-me, Mario!")
 
 client.remove_command("help") # for custom help command
 client.add_cog(MIDI_player(client)) # add MIDI Player commands and its ensuring tools to the bot
