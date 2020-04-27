@@ -1,8 +1,7 @@
 # discord-midi-player
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/cb07b219f17b4868bda23eef13afdbf4)](https://app.codacy.com/manual/bluntano/discord-midi-player?utm_source=github.com&utm_medium=referral&utm_content=bluntano/discord-midi-player&utm_campaign=Badge_Grade_Dashboard)
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/bluntano/discord-midi-player.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/bluntano/discord-midi-player/alerts/)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/bluntano/discord-midi-player.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/bluntano/discord-midi-player/context:python)
-[![Maintainability](https://api.codeclimate.com/v1/badges/69f6d182de0f6efcaef8/maintainability)](https://codeclimate.com/github/bluntano/discord-midi-player/maintainability)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/cb07b219f17b4868bda23eef13afdbf4)](https://app.codacy.com/manual/bluntano/discord-midi-player?utm_source=github.com&utm_medium=referral&utm_content=bluntano/discord-midi-player&utm_campaign=Badge_Grade_Dashboard)
+[![Maintainability](https://api.codeclimate.com/v1/badges/fd3bd4e42420fbde6551/maintainability)](https://codeclimate.com/github/bluntano/discord-midi-player/maintainability)
 [![CodeFactor](https://www.codefactor.io/repository/github/bluntano/discord-midi-player/badge)](https://www.codefactor.io/repository/github/bluntano/discord-midi-player)
 
  🎵 Simple Discord MIDI player, converts MIDI to WAV with sound font. 🎵
