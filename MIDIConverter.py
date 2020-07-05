@@ -108,15 +108,15 @@ class MIDIConverter:
             # removes MIDI file
             os.remove(self.midi_path)
             self.success = True
-            self.debug()
+            self.__debug()
             return self.wav_file
             
         except Exception as e:
             self.error = str(e)
-            self.debug()
+            self.__debug()
             raise ConversionError(self.error)
     
-    def debug(self):
+    def __debug(self):
         if DEBUG:
             info = {
                 self.id: {
