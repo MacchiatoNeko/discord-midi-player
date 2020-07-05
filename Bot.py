@@ -53,7 +53,7 @@ async def determine_prefix(client, message):
 client = commands.Bot(command_prefix=determine_prefix) # determine each guild's bot prefix
 
 # Status changer task
-# Changes the status every 30 seconds
+# Changes the status every half an hour
 async def status_task():
     while True:
         guilds_num = str(len(client.guilds))
@@ -66,7 +66,7 @@ async def status_task():
         for i in statuses:
             status = discord.Game(f"midi.help | {i}")
             await client.change_presence(activity=status)
-            await asyncio.sleep(60)
+            await asyncio.sleep(1800)
 
 # On bot logon
 @client.event
