@@ -8,6 +8,9 @@ if [ "$(printf '%s\n' "$requiredVer" "$currentVer" | sort -V | head -n1)" = "$re
 
     python3 -m pip install --upgrade pip 2>&1 >/dev/null
 
+    # Remove debug.json file
+    rm debug.json
+
     # Install the requirements
     # Uncomment the command below to install from the requirements file
     python3 -m pip install -r req.txt 2>&1 >/dev/null
