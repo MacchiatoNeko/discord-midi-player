@@ -1,14 +1,10 @@
 # discord-midi-player
-[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/bluntano/discord-midi-player.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/bluntano/discord-midi-player/context:python)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/b270482621f146dc813b37e96ee99095)](https://www.codacy.com/manual/bluntano/discord-midi-player?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=bluntano/discord-midi-player&amp;utm_campaign=Badge_Grade)
-[![Maintainability](https://api.codeclimate.com/v1/badges/fd3bd4e42420fbde6551/maintainability)](https://codeclimate.com/github/bluntano/discord-midi-player/maintainability)
-[![CodeFactor](https://www.codefactor.io/repository/github/bluntano/discord-midi-player/badge)](https://www.codefactor.io/repository/github/bluntano/discord-midi-player)
 
  🎵 Simple Discord MIDI player, converts MIDI to WAV with sound font. 🎵
  
  You can also invite the bot to your Discord server if you don't want to set up your own for example. Link right below.
  
- [Invite MIDI Player Bot](http://bluntano.site)
+ [Invite MIDI Player Bot](http://bot.televiisor.site)
 
 ## Content
 
