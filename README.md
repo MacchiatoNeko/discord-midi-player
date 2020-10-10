@@ -2,9 +2,9 @@
 
  🎵 Simple Discord MIDI player, converts MIDI to WAV with sound font. 🎵
  
- You can also invite the bot to your Discord server if you don't want to set up your own for example. Link right below.
+ ~~You can also invite the bot to your Discord server if you don't want to set up your own for example. Link right below.~~
  
- [Invite MIDI Player Bot](http://bot.televiisor.site)
+ ~~[Invite MIDI Player Bot](#)~~ nope! it's offline, cannot afford hosting the bot atm unless i find a place to host the bot.
 
 ## Content
 
