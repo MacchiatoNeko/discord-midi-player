@@ -1,31 +1,25 @@
 ################################
 # MIT License                  #
 # ---------------------------- #
-# Copyright (c) 2020 Bluntano  #
+# Copyright (c) 2021 Bluntano  #
 ################################
 
 # All neccessary module imports here
 import shutil # folder creatinon, deletion
 import pymongo # for MongoDB
 import os
-from dotenv import load_dotenv # for .env file
 
 # MIDIConverter.py
 from MIDIConverter import MIDIConverter, ConversionError, soundfonts
 
 # WebServer.py
-import WebServer
 # Discord stuff here
 import discord
 import asyncio
 from discord.ext import commands
 
-load_dotenv(verbose=True)
-print(soundfonts)
-
 # Get MongoDB variables (host and port)
-MONGODB_HOST = os.getenv("MONGODB_HOST")
-MONGODB_PORT = os.getenv("MONGODB_PORT")
+MONGODB_HOST = os.getenv("MONGO_HOST")
 
 # Get Discord app token
 TOKEN = os.getenv("DISCORD")
@@ -34,7 +28,8 @@ guilds_list = {} # player queues/dict for each Discord guild
 cooldown_time = 3
 
 # Database stuff here
-db_client = pymongo.MongoClient(MONGODB_HOST, int(MONGODB_PORT))
+print(f'Trying to connect to {MONGODB_HOST}')
+db_client = pymongo.MongoClient(MONGODB_HOST)
 dblist = db_client.list_database_names()
 if not "guild_database" in dblist:
     db = db_client["guild_database"]
@@ -70,11 +65,7 @@ async def status_task():
 
 # On bot logon
 @client.event
-async def on_ready():
-    
-    # for invite link
-    WebServer.client_userid = client.user.id
-    
+async def on_ready():    
     # counts up all the guilds the bot is in
     for guild in client.guilds:
         guilds_list[guild.id] = {'queue': []}
@@ -86,7 +77,6 @@ async def on_ready():
             guild_col.insert_one({"guild_id": guild.id, "prefix": "midi."})
     print("MIDI Player Ready")
     client.loop.create_task(status_task())
-    WebServer.keep_alive()
 
 # On bot joining new guild
 @client.event

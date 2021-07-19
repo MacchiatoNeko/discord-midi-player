@@ -4,7 +4,7 @@ requiredVer="3.5.3"
 
 if [ "$(printf '%s\n' "$requiredVer" "$currentVer" | sort -V | head -n1)" = "$requiredVer" ]; then
     # Display Python code logs (Errors, printings, etc.)
-    export PYTHONUNBUFFERED=true
+    #export PYTHONUNBUFFERED=true
 
     python3 -m pip install --upgrade pip 2>&1 >/dev/null
 
@@ -13,7 +13,7 @@ if [ "$(printf '%s\n' "$requiredVer" "$currentVer" | sort -V | head -n1)" = "$re
 
     # Install the requirements
     # Uncomment the command below to install from the requirements file
-    python3 -m pip install -r req.txt --upgrade 2>&1 >/dev/null
+    python3 -m pip install -r requirements.txt 2>&1 >/dev/null
 
     # Finally, start the bot
     python3 Bot.py

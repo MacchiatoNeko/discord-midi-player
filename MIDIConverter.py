@@ -1,7 +1,7 @@
 ################################
 # MIT License                  #
 # ---------------------------- #
-# Copyright (c) 2020 Bluntano  #
+# Copyright (c) 2021 Bluntano  #
 ################################
 import os
 import json
@@ -12,10 +12,10 @@ from midi2audio import FluidSynth
 # for debugging info
 from pytz import timezone
 from datetime import datetime
-tz = timezone('EET')
+tz = timezone('UTC')
 
 soundfonts = []
-DEBUG = True
+DEBUG = False
 
 class MIDIConverter:
 

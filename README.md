@@ -1,10 +1,6 @@
 # discord-midi-player
 
  🎵 Simple Discord MIDI player, converts MIDI to WAV with sound font. 🎵
- 
- ~~You can also invite the bot to your Discord server if you don't want to set up your own for example. Link right below.~~
- 
- ~~[Invite MIDI Player Bot](#)~~ nope! it's offline, cannot afford hosting the bot atm unless i find a place to host the bot.
 
 ## Content
 
@@ -39,41 +35,30 @@ Sample rate max - 44100 Hz; min - 8000 Hz.
 
 ## Installation
 
-Before you do anything, make a new `.env` file with the content:
-```Object
-DISCORD=<your app secret token>
-MONGODB_HOST=<your MongoDB host, can be localhost>
-MONGODB_PORT=<your MongoDB port, can be 27017>
-FLASK_HOST=localhost
+Before you start, make sure you update your Discord bot token in `docker-compose.yml` in app section:
+```
+...
+            DISCORD: 'your_bot_token_here'
+...
 ```
 
-I would highly recommend changing the MongoDB's hosting port from default (27017) for safety concerns.
+And by any chance if you don't want to have external MongoDB connected to your bot, you can simply delete `mongo:` section in `docker-compose.yml`, and then update `MONGO_HOST` environment variable with your MongoDB host:
+```
+        environment: 
+            MONGO_HOST: 'mongodb://<your_host>:<port>'
+```
 
-To get it up and running, you first have to launch `bash setup.sh` to install all required packages. After that you can simply launch `./start.sh`.
-
-### What do you essentially need from packets?
-
--  Python with pip (minimum Python version 3.5.3 due to discord.py module requirement)
--  ffmpeg (for playing songs in voice channel)
--  Fluidsynth (for converting MIDI to WAV file)
--  MongoDB (for database storage - for now, prefix system)
-
-To start MongoDB service immediately after setup, all you have to enter is `sudo systemctl start mongod`.
-
-If you don't like to have MongoDB server on the same machine, you can disable it with `sudo systemctl disable mongod` and stop it by replacing disable with stop in the command.
-
-**NOTE**: Works fine on Ubuntu 18.04 instance (AWS - Amazon Web Service). And `setup.sh` has a choice to make the bot work on instance startup, and log the bot's output when logging into the instance.
-
-**ANOTHER NOTE:** doesn't work on Windows, only on Debian or Ubuntu (as much as I've tested). Debian has issue with setup shell code so, you may need to install packages manually.
+Since the bot is dockerized, all you need to install is Docker and Docker Compose (*Docker Compose comes with Docker Desktop for Windows and macOS by default*). After that you build the image and run it:
+```
+docker-compose build
+docker-compose up
+```
 
 ## TODO
 
 1.  Develop skip vote system
 2.  Implement inactivity system (when inactive, leave the vc)
-3.  #StayTheFuckHome
-
-I'll update the todo list from time to time.
 
 ## 
 
-Alright, bye-bye :) Bluntano 2020
+Alright, bye-bye :) Bluntano 2021

@@ -1,5 +1,4 @@
 discord.py[voice]
-python-dotenv
 midi2audio
 requests
 pymongo

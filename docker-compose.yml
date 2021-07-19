@@ -1,0 +1,21 @@
+version: "3"
+services:
+    mongo:
+        container_name: mongo
+        image: mongo
+        ports: 
+            - "27017:27017"
+        networks: 
+            - bot_net
+    app:
+        container_name: midi_bot
+        restart: always
+        build: .
+        environment: 
+            MONGO_HOST: mongo
+            DISCORD: 'your_bot_token_here'
+        networks: 
+            - bot_net
+
+networks: 
+    bot_net:
