@@ -3,9 +3,6 @@ currentVer=$(python3 --version)
 requiredVer="3.5.3"
 
 if [ "$(printf '%s\n' "$requiredVer" "$currentVer" | sort -V | head -n1)" = "$requiredVer" ]; then
-    # Display Python code logs (Errors, printings, etc.)
-    #export PYTHONUNBUFFERED=true
-
     python3 -m pip install --upgrade pip 2>&1 >/dev/null
 
     # Remove debug.json file
